@@ -1,0 +1,2574 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0A0A0A">
+<title>ScaffSafe Pro — Premium DOSH Scaffolder App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800;900&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #070707;
+  --surface: #111111;
+  --surface-raised: #1A1A1A;
+  --surface-glow: rgba(255, 107, 0, 0.05);
+  --border: #222222;
+  --border-highlight: #333333;
+  --text: #FFFFFF;
+  --text-dim: #999999;
+  --text-muted: #555555;
+  --accent: #FF6B00;
+  --accent-dim: #CC5500;
+  --accent-glow: rgba(255, 107, 0, 0.3);
+  --success: #00E676;
+  --danger: #FF3D00;
+  --warning: #FFC400;
+  --caution: #FFEA00;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+
+body {
+  font-family: 'Manrope', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+  overflow-x: hidden;
+  background-image: 
+    linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Latar Belakang Gradien */
+body::after {
+  content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: radial-gradient(circle at 50% 0%, rgba(255,107,0,0.1) 0%, transparent 60%);
+  pointer-events: none; z-index: -1;
+}
+
+.mono { font-family: 'JetBrains Mono', monospace; }
+.display { font-family: 'Archivo Black', sans-serif; letter-spacing: -0.02em; }
+
+.hazard-stripe {
+  height: 6px;
+  background: repeating-linear-gradient(45deg, var(--accent), var(--accent) 10px, #000 10px, #000 20px);
+  box-shadow: 0 2px 10px var(--accent-glow);
+}
+
+/* Header */
+.app-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(7, 7, 7, 0.8);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.header-content { max-width: 1200px; margin: 0 auto; padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; }
+.logo { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; transition: transform 0.2s; }
+.logo:hover { transform: scale(1.02); }
+.logo-mark {
+  width: 38px; height: 38px; background: linear-gradient(135deg, var(--accent), var(--warning));
+  position: relative; display: flex; align-items: center; justify-content: center;
+  font-family: 'Archivo Black', sans-serif; font-size: 1.2rem; color: #000;
+  clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); box-shadow: 0 0 15px var(--accent-glow);
+}
+.logo-text { font-family: 'Archivo Black', sans-serif; font-size: 1.2rem; letter-spacing: -0.03em; text-transform: uppercase; }
+.logo-text .pro { color: var(--accent); font-size: 0.7rem; vertical-align: super; margin-left: 2px; text-shadow: 0 0 10px var(--accent-glow); }
+
+.header-stats { display: flex; gap: 0.75rem; align-items: center; }
+
+/* Toggle Bahasa */
+.lang-toggle {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+  display: flex; padding: 0.2rem; cursor: pointer;
+}
+.lang-toggle span {
+  padding: 0.3rem 0.6rem; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: bold;
+  color: var(--text-muted); border-radius: 15px; transition: all 0.2s;
+}
+.lang-toggle span.active { background: var(--accent); color: #000; box-shadow: 0 0 10px var(--accent-glow); }
+
+.stat-pill {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; padding: 0.4rem 0.8rem;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+  display: flex; align-items: center; gap: 0.5rem; color: var(--text-dim);
+}
+.stat-pill.streak { color: var(--accent); border-color: rgba(255,107,0,0.3); background: var(--surface-glow); }
+.stat-pill .dot {
+  width: 8px; height: 8px; background: var(--accent); border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent); animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--accent); } 50% { opacity: 0.4; box-shadow: 0 0 2px var(--accent); } }
+
+/* Kontainer Utama */
+.main { max-width: 1200px; margin: 0 auto; padding: 2rem 1.25rem 6rem; position: relative; z-index: 2; }
+.screen { display: none; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+.screen.active { display: block; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Bagian Hero */
+.hero { margin-bottom: 2.5rem; position: relative; }
+.hero-label { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+.hero-label::before { content: ''; width: 30px; height: 2px; background: var(--accent); }
+.hero-title { font-family: 'Archivo Black', sans-serif; font-size: clamp(2.5rem, 8vw, 4.5rem); line-height: 0.9; letter-spacing: -0.04em; text-transform: uppercase; margin-bottom: 1rem; }
+.hero-title .highlight { color: transparent; -webkit-text-stroke: 2px var(--accent); background: linear-gradient(to right, var(--accent), var(--warning)); -webkit-background-clip: text; position: relative; }
+.hero-subtitle { color: var(--text-dim); font-size: 1.05rem; max-width: 550px; margin-bottom: 1.5rem; }
+
+/* Widget Dasbor */
+.dashboard-widgets { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-bottom: 2.5rem; }
+@media (min-width: 768px) { .dashboard-widgets { grid-template-columns: 2fr 1fr; } }
+.widget-card { background: var(--surface); border: 1px solid var(--border); padding: 1.5rem; border-radius: 12px; position: relative; overflow: hidden; }
+.widget-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent); }
+.widget-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+.widget-title { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-dim); }
+
+.progress-value { font-family: 'Archivo Black', sans-serif; font-size: 2rem; color: var(--text); }
+.progress-bar { height: 8px; background: var(--bg); border-radius: 4px; position: relative; overflow: hidden; margin-bottom: 1rem; border: 1px solid var(--border); }
+.progress-fill { height: 100%; background: repeating-linear-gradient(45deg, var(--accent), var(--accent) 10px, var(--warning) 10px, var(--warning) 20px); background-size: 28px 28px; animation: moveStripes 1s linear infinite; transition: width 0.8s cubic-bezier(0.65, 0, 0.35, 1); box-shadow: 0 0 10px var(--accent-glow); }
+@keyframes moveStripes { 0% { background-position: 0 0; } 100% { background-position: 28px 0; } }
+.progress-meta { display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-muted); }
+
+.fact-widget { background: linear-gradient(145deg, var(--surface), var(--surface-raised)); border: 1px solid var(--border); }
+.fact-widget::before { background: var(--success); }
+.fact-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+.fact-text { font-size: 0.9rem; color: var(--text-dim); font-style: italic; }
+
+/* Kisi Menu */
+.section-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); }
+.section-title { font-family: 'Archivo Black', sans-serif; font-size: 1.5rem; text-transform: uppercase; letter-spacing: -0.01em; }
+.section-subtitle { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+
+.menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 2rem; }
+@media (min-width: 768px) { .menu-grid { grid-template-columns: repeat(3, 1fr); } }
+.menu-item {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem 1.25rem;
+  cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); position: relative; text-align: left;
+  color: var(--text); display: flex; flex-direction: column; gap: 1rem; overflow: hidden;
+}
+.menu-item::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, var(--accent-glow) 0%, transparent 60%); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+.menu-item:hover, .menu-item:active { background: var(--surface-raised); border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.5), 0 0 15px var(--surface-glow); }
+.menu-item:hover::after { opacity: 1; }
+.menu-item .icon { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: var(--bg); border: 1px solid var(--border-highlight); border-radius: 8px; color: var(--accent); transition: all 0.3s; }
+.menu-item:hover .icon { background: var(--accent); color: #000; }
+.menu-item svg { width: 22px; height: 22px; stroke-width: 2; }
+.menu-item .menu-title { font-family: 'Archivo Black', sans-serif; font-size: 1.05rem; text-transform: uppercase; letter-spacing: -0.01em; margin-bottom: 0.25rem; }
+.menu-item .menu-desc { font-size: 0.8rem; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
+
+/* Kartu Level */
+.level-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+.level-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 1.5rem; position: relative; }
+.level-card:hover { border-color: var(--accent); transform: translateX(8px); background: var(--surface-raised); }
+.level-number { font-family: 'Archivo Black', sans-serif; font-size: 3rem; color: var(--accent); line-height: 1; min-width: 70px; opacity: 0.8; }
+.level-info h3 { font-family: 'Archivo Black', sans-serif; font-size: 1.2rem; text-transform: uppercase; margin-bottom: 0.5rem; }
+.level-info p { font-size: 0.9rem; color: var(--text-dim); }
+.level-badge { position: absolute; top: 1rem; right: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; background: var(--surface-glow); padding: 0.3rem 0.6rem; border-radius: 4px; }
+
+/* Daftar Modul */
+.module-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.module-item { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 1rem; text-align: left; color: var(--text); }
+.module-item:hover { border-color: var(--accent); background: var(--surface-raised); }
+.module-item.completed { border-left: 4px solid var(--success); }
+.module-number { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--accent); min-width: 40px; font-weight: 700; }
+.module-title { flex: 1; font-weight: 600; font-size: 1rem; }
+.module-status { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; }
+.module-status.done { color: var(--success); }
+
+/* Tampilan Pelajaran & Diagram SVG */
+.lesson-container { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 2rem 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+.lesson-header { border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; margin-bottom: 1.5rem; }
+.lesson-breadcrumb { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.75rem; }
+.lesson-title { font-family: 'Archivo Black', sans-serif; font-size: 1.8rem; text-transform: uppercase; line-height: 1.2; }
+.lesson-body { font-size: 1rem; line-height: 1.8; color: #D0D0D0; }
+.lesson-body h3 { font-family: 'Archivo Black', sans-serif; font-size: 1.2rem; color: var(--accent); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: -0.01em; }
+.lesson-body p { margin-bottom: 1.25rem; }
+.lesson-body ul, .lesson-body ol { padding-left: 1.5rem; margin-bottom: 1.25rem; }
+.lesson-body li { margin-bottom: 0.5rem; }
+.lesson-body ul li::marker { color: var(--accent); }
+.lesson-body strong { color: var(--text); font-weight: 700; }
+
+.svg-diagram-box {
+  background: #111; border-radius: 8px; padding: 1.5rem; margin: 1.5rem 0; 
+  text-align: center; border: 1px dashed var(--border-highlight);
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+.svg-diagram-box svg { max-width: 100%; height: auto; }
+.svg-diagram-box .caption { font-size:0.75rem; color:var(--text-dim); font-family:monospace; margin-top:0.5rem; }
+
+/* Kotak Info & Pengiraan */
+.formula-box { background: var(--surface-raised); border: 1px solid var(--accent); padding: 1rem; border-radius: 8px; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; color: var(--accent); margin: 1rem 0; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+.calc-example { background: rgba(255,255,255,0.02); padding: 1.25rem; border-radius: 8px; font-family: 'JetBrains Mono', monospace; border-left: 3px solid var(--accent); margin-bottom: 1.5rem; color: #E0E0E0; line-height: 1.8; }
+
+.info-box { background: var(--surface-glow); border-left: 4px solid var(--accent); padding: 1.25rem; margin: 1.5rem 0; border-radius: 0 8px 8px 0; }
+.info-box.warning { background: rgba(255,196,0,0.05); border-left-color: var(--warning); }
+.info-box.danger { background: rgba(255,61,0,0.05); border-left-color: var(--danger); }
+.info-box-title { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 0.5rem; font-weight: bold; }
+.info-box.warning .info-box-title { color: var(--warning); }
+.info-box.danger .info-box-title { color: var(--danger); }
+
+/* Mesin Kuis */
+.quiz-container { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 2rem 1.5rem; }
+.quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+.quiz-progress-label { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--text-dim); text-transform: uppercase; }
+.quiz-timer { font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; color: var(--accent); font-weight: 700; background: var(--surface-glow); padding: 0.3rem 0.8rem; border-radius: 4px;}
+.quiz-question { font-family: 'Archivo Black', sans-serif; font-size: 1.4rem; line-height: 1.4; margin-bottom: 2rem; text-transform: uppercase; letter-spacing: -0.01em; }
+.quiz-options { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2rem; }
+.quiz-option { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 1.25rem; text-align: left; color: var(--text); font-family: inherit; font-size: 1rem; width: 100%; }
+.quiz-option:hover:not(.disabled) { border-color: var(--accent); background: var(--surface-raised); }
+.quiz-option.selected { border-color: var(--accent); background: var(--surface-glow); box-shadow: inset 0 0 0 1px var(--accent); }
+.quiz-option.correct { border-color: var(--success); background: rgba(0,230,118,0.1); box-shadow: inset 0 0 0 1px var(--success); }
+.quiz-option.wrong { border-color: var(--danger); background: rgba(255,61,0,0.1); box-shadow: inset 0 0 0 1px var(--danger); }
+.quiz-option.disabled { cursor: not-allowed; opacity: 0.7; }
+.option-letter { font-family: 'Archivo Black', sans-serif; font-size: 1.1rem; min-width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--surface); color: var(--text-dim); border-radius: 6px; }
+.quiz-option.selected .option-letter { background: var(--accent); color: #000; }
+.quiz-option.correct .option-letter { background: var(--success); color: #000; }
+.quiz-option.wrong .option-letter { background: var(--danger); color: #fff; }
+.explanation { background: var(--surface-raised); border-left: 4px solid var(--accent); padding: 1.25rem; margin: 1.5rem 0; font-size: 0.95rem; line-height: 1.6; color: var(--text); display: none; border-radius: 0 8px 8px 0; }
+.explanation.show { display: block; animation: slideUp 0.3s ease; }
+.explanation-title { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; text-transform: uppercase; color: var(--accent); margin-bottom: 0.75rem; letter-spacing: 0.1em; font-weight:bold; }
+
+/* Tombol */
+.btn {
+  background: var(--accent); color: #000; border: none; border-radius: 6px; padding: 1rem 1.5rem;
+  font-family: 'Archivo Black', sans-serif; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em;
+  cursor: pointer; transition: all 0.2s; width: 100%; position: relative; overflow: hidden;
+  box-shadow: 0 4px 15px var(--accent-glow); display: flex; justify-content: center; align-items: center; gap: 0.5rem;
+}
+.btn:hover:not(:disabled) { background: var(--warning); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,196,0,0.3); }
+.btn:active { transform: translateY(0); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+.btn.secondary { background: transparent; color: var(--text); border: 1px solid var(--border-highlight); box-shadow: none; }
+.btn.secondary:hover { border-color: var(--text); background: var(--surface-raised); }
+.btn.outline { background: var(--bg); color: var(--accent); border: 1px solid var(--accent); box-shadow:none;}
+.btn.outline:hover { background: var(--surface-glow); }
+.btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+.back-btn {
+  background: transparent; border: 1px solid var(--border); color: var(--text-dim); border-radius: 6px;
+  padding: 0.6rem 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; cursor: pointer;
+  margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem;
+}
+.back-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--surface-glow); }
+
+/* Hasil */
+.result-hero { text-align: center; padding: 3rem 1rem; margin-bottom: 1.5rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+.result-score { font-family: 'Archivo Black', sans-serif; font-size: clamp(5rem, 15vw, 8rem); line-height: 1; color: var(--accent); letter-spacing: -0.04em; text-shadow: 0 0 30px var(--accent-glow); }
+.result-label { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.2em; color: var(--text-dim); margin-top: 1rem; }
+.result-status { display: inline-block; padding: 0.75rem 1.5rem; margin-top: 1.5rem; font-family: 'Archivo Black', sans-serif; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.1em; border-radius: 4px;}
+.result-status.pass { background: var(--success); color: #000; box-shadow: 0 0 20px rgba(0,230,118,0.3); }
+.result-status.fail { background: var(--danger); color: #fff; box-shadow: 0 0 20px rgba(255,61,0,0.3); }
+.result-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+.result-stat { background: var(--surface); border: 1px solid var(--border); padding: 1.5rem 0.5rem; text-align: center; border-radius: 8px; }
+.result-stat-value { font-family: 'Archivo Black', sans-serif; font-size: 1.8rem; color: var(--text); }
+.result-stat-label { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.5rem; }
+
+/* Elemen Interaktif */
+.calc-input { width: 100%; padding: 1rem; background: var(--bg); border: 1px solid var(--border-highlight); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 1rem; margin-top: 0.5rem; border-radius: 6px; transition: border 0.2s; }
+.calc-input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 2px var(--accent-glow); }
+.interactive-check { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; background: var(--bg); border: 1px solid var(--border-highlight); margin-bottom: 0.75rem; cursor: pointer; transition: all 0.2s; border-radius: 8px; }
+.interactive-check:hover { border-color: var(--accent); background: var(--surface-raised); }
+.interactive-check input[type="checkbox"] { margin-top: 0.25rem; accent-color: var(--accent); width: 20px; height: 20px; cursor: pointer; }
+.interactive-check span { font-size: 0.95rem; line-height: 1.5; }
+
+/* Gaya Cetak (Print) */
+@media print {
+  body.print-mode * { visibility: hidden; }
+  body.print-mode #certOutputArea, body.print-mode #certOutputArea * { visibility: visible; }
+  body.print-mode #certOutputArea { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; }
+  
+  body.print-checklist-mode * { visibility: hidden; }
+  body.print-checklist-mode #printableChecklist, body.print-checklist-mode #printableChecklist * { visibility: visible; color: #000 !important; }
+  body.print-checklist-mode #printableChecklist { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; background: white; }
+  body.print-checklist-mode .interactive-check { border: 1px solid #ccc; background: #fff; margin-bottom: 10px; break-inside: avoid; }
+  body.print-checklist-mode .print-hide { display: none !important; }
+  body.print-checklist-mode h2 { color: #000 !important; }
+
+  .certificate-box { box-shadow: none; width: 100%; height: auto; margin: 20px auto; }
+  .btn, .back-btn, .header-content { display: none !important; }
+}
+
+/* Gaya Sertifikat */
+.certificate-box {
+  background: #FDFDFD; color: #111; padding: clamp(1.5rem, 5vw, 3rem);
+  border: 2px solid #D4AF37; outline: clamp(4px, 2vw, 10px) solid #FDFDFD;
+  box-shadow: 0 0 0 clamp(6px, 3vw, 14px) #D4AF37, 0 30px 60px rgba(0,0,0,0.8);
+  border-radius: 2px; text-align: center; position: relative; margin-top: 2rem; overflow: hidden;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.certificate-box::before { content: ''; position: absolute; top: 15px; left: 15px; right: 15px; bottom: 15px; border: 2px solid #D4AF37; pointer-events: none; z-index: 10; }
+.cert-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Archivo Black', sans-serif; font-size: clamp(10rem, 40vw, 28rem); color: #D4AF37; opacity: 0.04; pointer-events: none; z-index: 0; line-height: 0.8; }
+.cert-content-wrap { position: relative; z-index: 5; }
+.cert-serial { position: absolute; top: -15px; left: 0; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #888; letter-spacing: 0.05em; }
+.cert-header { font-family: 'Playfair Display', serif; font-weight: 900; font-size: clamp(1.8rem, 6vw, 3.5rem); background: linear-gradient(to right, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; letter-spacing: 0.05em; }
+.cert-sub { font-family: 'JetBrains Mono', monospace; font-size: clamp(0.65rem, 2vw, 0.85rem); color: #B38728; text-transform: uppercase; letter-spacing: 0.25em; margin-bottom: 2.5rem; font-weight: bold; }
+.cert-photo { width: clamp(90px, 25vw, 140px); height: clamp(90px, 25vw, 140px); border-radius: 50%; object-fit: cover; border: 4px solid #D4AF37; margin: 0 auto 1.5rem; box-shadow: 0 8px 20px rgba(0,0,0,0.15); display: block; background:#eee; position: relative; z-index: 5; }
+.cert-name { font-family: 'Playfair Display', serif; font-weight: 800; font-size: clamp(1.5rem, 6vw, 2.8rem); color: #111111; margin-bottom: 1.5rem; border-bottom: 2px solid #D4AF37; display: inline-block; padding: 0 1rem 0.5rem; word-break: break-word; letter-spacing: 0.05em; text-transform: uppercase; }
+.cert-text { font-family: 'Manrope', sans-serif; font-size: clamp(0.85rem, 3vw, 1.05rem); line-height: 1.8; color: #333; max-width: 95%; margin: 0 auto 2rem; }
+.cert-seal { position: relative; margin: 0 auto 1.5rem; width: clamp(80px, 20vw, 110px); height: clamp(80px, 20vw, 110px); background: radial-gradient(circle, #FCF6BA 0%, #B38728 50%, #AA771C 100%); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #FFFFFF; font-family: 'Archivo Black', sans-serif; font-size: 0.6rem; line-height: 1.2; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); box-shadow: 0 5px 15px rgba(0,0,0,0.4); z-index: 10; }
+.cert-seal::after { content: ''; position: absolute; top: 4px; left: 4px; right: 4px; bottom: 4px; border: 1.5px dashed #FFFFFF; border-radius: 50%; opacity: 0.6; }
+.cert-seal span { font-size: 0.4rem; letter-spacing: 0.1em; margin-top: 3px;}
+.cert-footer { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 1.5rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #E0E0E0; font-family: 'JetBrains Mono', monospace; font-size: clamp(0.7rem, 2vw, 0.85rem); color: #333; }
+.cert-sign-area { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.cert-sign-area-left { text-align: center; }
+.fake-sign { font-family: 'Dancing Script', cursive; font-size: clamp(2.2rem, 7vw, 3.2rem); color: #111111; margin-bottom: 10px; transform: rotate(-2deg); line-height: 1.2; }
+@media (min-width: 768px) {
+  .cert-footer { flex-direction: row; justify-content: space-between; align-items: flex-end; padding-left: 150px; margin-top: 2.5rem; border-top: none; }
+  .cert-sign-area-left { text-align: left; }
+  .cert-seal { position: absolute; bottom: 25px; left: 40px; margin: 0; }
+  .cert-seal::after { top: 5px; left: 5px; right: 5px; bottom: 5px; }
+  .cert-seal span { font-size: 0.45rem; }
+}
+
+.footer-note { text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-muted); margin-top: 4rem; padding: 2rem; text-transform: uppercase; letter-spacing: 0.1em; border-top: 1px solid var(--border); }
+.svg-icon { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+
+/* Custom Modal */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+.modal-overlay.active { opacity: 1; pointer-events: auto; }
+.modal-box { background: var(--surface); border: 1px solid var(--border-highlight); border-radius: 12px; padding: 2rem; max-width: 90%; width: 400px; text-align: center; transform: translateY(20px); transition: transform 0.3s ease; box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 20px var(--surface-glow); }
+.modal-overlay.active .modal-box { transform: translateY(0); }
+.modal-title { font-family: 'Archivo Black', sans-serif; color: var(--accent); margin-bottom: 1rem; font-size: 1.2rem; text-transform: uppercase; letter-spacing: -0.01em;}
+.modal-message { color: var(--text); margin-bottom: 2rem; font-size: 1rem; line-height: 1.5; font-family: 'Manrope', sans-serif;}
+.modal-buttons { display: flex; gap: 1rem; justify-content: center; }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-content">
+    <div class="logo" onclick="goHome()">
+      <div class="logo-mark">S</div>
+      <div class="logo-text">ScaffSafe<span class="pro">PRO</span></div>
+    </div>
+    <div class="header-stats">
+      <div class="lang-toggle" onclick="toggleLang()">
+        <span id="btn-lang-ms" class="active">MS</span>
+        <span id="btn-lang-en">EN</span>
+      </div>
+      <div class="stat-pill streak" title="Streak">
+        <span class="dot"></span>
+        <span id="streakCount">0</span> <span data-i18n="header_days">HARI</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="hazard-stripe"></div>
+
+<main class="main">
+
+  <div id="screen-home" class="screen active">
+    <section class="hero">
+      <div class="hero-label">
+        <svg class="svg-icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span data-i18n="hero_label">Persediaan Exam DOSH & NOSS</span>
+      </div>
+      <h1 class="hero-title" data-i18n="hero_title">Lulus Exam.<br><span class="highlight">Naik Level.</span></h1>
+      <p class="hero-subtitle" data-i18n="hero_subtitle">Platform e-pembelajaran premium untuk Scaffolder Malaysia. Lengkap dengan modul piawaian NOSS, OSHA 1994, kuiz, dan utiliti tapak binaan.</p>
+    </section>
+
+    <div class="dashboard-widgets">
+      <div class="widget-card">
+        <div class="widget-header">
+          <span class="widget-title" data-i18n="widget_prog_title">Progress Keseluruhan</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:1rem;">
+          <span class="progress-value" id="overallProgress">0%</span>
+          <span class="progress-meta"><span data-i18n="widget_prog_mod">Modul</span>: <span id="moduleCompleted">0</span>/<span id="moduleTotal">13</span></span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+        <button class="btn" style="padding:0.7rem; font-size:0.8rem; margin-top:1rem;" onclick="showScreen('modules')">
+          <span data-i18n="btn_continue">Sambung Pembelajaran</span> <svg class="svg-icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </button>
+      </div>
+
+      <div class="widget-card fact-widget">
+        <div class="widget-header">
+          <span class="widget-title" style="color:var(--success);" data-i18n="widget_fact_title">Fakta Hari Ini</span>
+        </div>
+        <div class="fact-icon">👷🏽‍♂️</div>
+        <div class="fact-text" id="dailyFact">"Tali dagu..."</div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <h2 class="section-title" data-i18n="menu_main">Menu Utama</h2>
+      <span class="section-subtitle" data-i18n="menu_sub">Pilih Tindakan</span>
+    </div>
+
+    <div class="menu-grid">
+      <button class="menu-item" onclick="showScreen('levels')">
+        <div class="icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></div>
+        <div>
+          <div class="menu-title" data-i18n="m_learn_t">Modul Belajar</div>
+          <div class="menu-desc" data-i18n="m_learn_d">Nota Standard & Akta</div>
+        </div>
+      </button>
+
+      <button class="menu-item" onclick="startDailyQuiz()">
+        <div class="icon"><svg class="svg-icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
+        <div>
+          <div class="menu-title" data-i18n="m_quiz_t">Kuiz Harian</div>
+          <div class="menu-desc" data-i18n="m_quiz_d">Uji Minda 5 Soalan</div>
+        </div>
+      </button>
+
+      <button class="menu-item" onclick="startMockExam()">
+        <div class="icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></div>
+        <div>
+          <div class="menu-title" data-i18n="m_exam_t">Mock Exam</div>
+          <div class="menu-desc" data-i18n="m_exam_d">Simulasi Peperiksaan</div>
+        </div>
+      </button>
+
+      <button class="menu-item" onclick="showScreen('search')">
+        <div class="icon"><svg class="svg-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></div>
+        <div>
+          <div class="menu-title" data-i18n="m_search_t">Carian Cepat</div>
+          <div class="menu-desc" data-i18n="m_search_d">Buku Poket Pintar</div>
+        </div>
+      </button>
+      
+      <button class="menu-item" onclick="showScreen('calculator')">
+        <div class="icon"><svg class="svg-icon" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="16" y1="14" x2="16" y2="14.01"></line><line x1="12" y1="14" x2="12" y2="14.01"></line><line x1="8" y1="14" x2="8" y2="14.01"></line><line x1="16" y1="10" x2="16" y2="10.01"></line><line x1="12" y1="10" x2="12" y2="10.01"></line><line x1="8" y1="10" x2="8" y2="10.01"></line><line x1="16" y1="18" x2="16" y2="18.01"></line><line x1="12" y1="18" x2="12" y2="18.01"></line><line x1="8" y1="18" x2="8" y2="18.01"></line></svg></div>
+        <div>
+          <div class="menu-title" data-i18n="m_calc_t">Kira Beban</div>
+          <div class="menu-desc" data-i18n="m_calc_d">Kalkulator SWL</div>
+        </div>
+      </button>
+
+      <button class="menu-item" onclick="showScreen('checklist')">
+        <div class="icon"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></div>
+        <div>
+          <div class="menu-title" data-i18n="m_check_t">Checklist Tapak</div>
+          <div class="menu-desc" data-i18n="m_check_d">Inspeksi Bersepadu</div>
+        </div>
+      </button>
+
+      <button class="menu-item" onclick="showScreen('progress')">
+        <div class="icon"><svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
+        <div>
+          <div class="menu-title" data-i18n="m_prog_t">Progress Aku</div>
+          <div class="menu-desc" data-i18n="m_prog_d">Statistik & Rekod</div>
+        </div>
+      </button>
+
+      <button class="menu-item" style="border-color: var(--accent); box-shadow: inset 0 0 20px var(--surface-glow);" onclick="showScreen('certificate')">
+        <div class="icon" style="background:var(--accent); color:#000;"><svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg></div>
+        <div>
+          <div class="menu-title" style="color: var(--accent);" data-i18n="m_cert_t">Sijil Digital</div>
+          <div class="menu-desc" data-i18n="m_cert_d">Jana Sijil Pencapaian</div>
+        </div>
+      </button>
+
+      <button class="menu-item" onclick="showScreen('about')">
+        <div class="icon"><svg class="svg-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
+        <div>
+          <div class="menu-title" data-i18n="m_about_t">Tentang App</div>
+          <div class="menu-desc" data-i18n="m_about_d">Info Sistem & Rujukan</div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <div id="screen-levels" class="screen">
+    <button class="back-btn" onclick="goHome()"><svg class="svg-icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg> <span data-i18n="btn_back">Kembali</span></button>
+    <div class="section-header">
+      <h2 class="section-title" data-i18n="lvl_title">Pilih Level</h2>
+      <span class="section-subtitle" data-i18n="lvl_sub">Silibus Berdaftar</span>
+    </div>
+    <div class="level-grid">
+      <div class="level-card" onclick="showLevelModules(1)">
+        <div class="level-number">01</div>
+        <div class="level-info">
+          <h3 data-i18n="lvl_1_t">Scaffolder Peringkat Asas (Level 1)</h3>
+          <p data-i18n="lvl_1_d">Asas scaffolding, OSHA Akta 514, pengiraan beban mati, komponen, dan prosedur kerja selamat. Rujukan Piawaian Kebangsaan (NOSS).</p>
+        </div>
+        <div class="level-badge" data-i18n="lvl_avail">Tersedia</div>
+      </div>
+      <div class="level-card" onclick="showLevelModules(2)">
+        <div class="level-number">02</div>
+        <div class="level-info">
+          <h3 data-i18n="lvl_2_t">Scaffolder Pertengahan (Level 2)</h3>
+          <p data-i18n="lvl_2_d">Advanced erection, load calculation, bracing, modification inspection.</p>
+        </div>
+        <div class="level-badge" data-i18n="lvl_soon">Akan Datang</div>
+      </div>
+      <div class="level-card" onclick="showLevelModules(3)">
+        <div class="level-number">03</div>
+        <div class="level-info">
+          <h3 data-i18n="lvl_3_t">Penyelia Scaffolder (Level 3)</h3>
+          <p data-i18n="lvl_3_d">Penyeliaan tapak, semakan lukisan reka bentuk, dan penilaian risiko khusus.</p>
+        </div>
+        <div class="level-badge" data-i18n="lvl_soon">Akan Datang</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-modules" class="screen">
+    <button class="back-btn" onclick="showScreen('levels')"><svg class="svg-icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg> <span data-i18n="btn_back">Kembali</span></button>
+    <div class="section-header">
+      <h2 class="section-title" id="moduleScreenTitle">Level 1 Modul</h2>
+      <span class="section-subtitle" id="moduleCount">13 modul</span>
+    </div>
+    <div class="module-list" id="moduleList"></div>
+  </div>
+
+  <div id="screen-lesson" class="screen">
+    <button class="back-btn" onclick="showScreen('modules')"><svg class="svg-icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg> <span data-i18n="btn_mod_list">Senarai Modul</span></button>
+    <div class="lesson-container">
+      <div class="lesson-header">
+        <div class="lesson-breadcrumb" id="lessonBreadcrumb">Level 1 / Modul 1</div>
+        <h1 class="lesson-title" id="lessonTitle">Tajuk Modul</h1>
+      </div>
+      <div class="lesson-body" id="lessonBody"></div>
+    </div>
+    <button class="btn" onclick="startModuleQuiz()">
+      <span data-i18n="btn_start_mod_quiz">Mula Kuiz Untuk Modul Ini</span> <svg class="svg-icon" style="width:18px;height:18px;" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+    </button>
+  </div>
+
+  <div id="screen-calculator" class="screen">
+    <button class="back-btn" onclick="goHome()"><svg class="svg-icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg> <span data-i18n="btn_back">Kembali</span></button>
+    <div class="section-header">
+      <h2 class="section-title" data-i18n="calc_title">Kalkulator Beban Lanjutan</h2>
+      <span class="section-subtitle" data-i18n="calc_sub">Tugasan SWL (Safe Working Load)</span>
+    </div>
+    <div class="lesson-container">
+      <p style="margin-bottom:1.5rem; font-size:1rem; color:var(--text-dim);" data-i18n="calc_desc">Kira nilai <strong>Beban Mati (Dead Load)</strong> komponen fizikal dan tambahkan dengan <strong>Beban Hidup (Live Load)</strong> berdasarkan gred tugas perancah.</p>
+      
+      <div style="margin-bottom:2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border);">
+        <label style="font-size:0.85rem; color:var(--accent); font-family:'JetBrains Mono',monospace; text-transform:uppercase;" data-i18n="calc_duty_lbl">Kategori Tugas (Beban Hidup / Live Load)</label>
+        <select id="calcDuty" class="calc-input" onchange="calculateLoad()">
+          <option value="225" data-i18n="opt_light">Tugas Ringan (Light Duty - 225 kg/bay)</option>
+          <option value="450" data-i18n="opt_med">Tugas Sederhana (Medium Duty - 450 kg/bay)</option>
+          <option value="675" data-i18n="opt_heavy">Tugas Berat (Heavy Duty - 675 kg/bay)</option>
+        </select>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;" data-i18n="calc_duty_desc">Pilih bergantung kepada kegunaan perancah (cth: mengecat = ringan, kerja simen = berat).</p>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-bottom:2rem;">
+        <div><label style="font-size:0.85rem; color:var(--accent); font-family:'JetBrains Mono',monospace;" data-i18n="calc_plank">Papan/Plank (5.4kg)</label><input type="number" id="calcPlank" min="0" value="0" class="calc-input" oninput="this.value = Math.abs(this.value); calculateLoad()"></div>
+        <div><label style="font-size:0.85rem; color:var(--accent); font-family:'JetBrains Mono',monospace;" data-i18n="calc_guard">Guardrail (2.55kg)</label><input type="number" id="calcGuardrail" min="0" value="0" class="calc-input" oninput="this.value = Math.abs(this.value); calculateLoad()"></div>
+        <div><label style="font-size:0.85rem; color:var(--accent); font-family:'JetBrains Mono',monospace;" data-i18n="calc_brace">Brace (5.9kg)</label><input type="number" id="calcBrace" min="0" value="0" class="calc-input" oninput="this.value = Math.abs(this.value); calculateLoad()"></div>
+        <div><label style="font-size:0.85rem; color:var(--accent); font-family:'JetBrains Mono',monospace;" data-i18n="calc_base">Base Plate (1.4kg)</label><input type="number" id="calcBase" min="0" value="0" class="calc-input" oninput="this.value = Math.abs(this.value); calculateLoad()"></div>
+        <div><label style="font-size:0.85rem; color:var(--accent); font-family:'JetBrains Mono',monospace;" data-i18n="calc_ladder">Ladder (2.9kg)</label><input type="number" id="calcLadder" min="0" value="0" class="calc-input" oninput="this.value = Math.abs(this.value); calculateLoad()"></div>
+        <div><label style="font-size:0.85rem; color:var(--accent); font-family:'JetBrains Mono',monospace;" data-i18n="calc_other">Lain-lain (kg)</label><input type="number" id="calcLain" min="0" value="0" class="calc-input" oninput="this.value = Math.abs(this.value); calculateLoad()"></div>
+      </div>
+      
+      <div id="calcResultBox" style="padding:2rem; background:linear-gradient(145deg, var(--surface-raised), var(--surface)); border:2px solid var(--accent); text-align:center; border-radius:12px; transition: all 0.3s; box-shadow: 0 10px 30px var(--surface-glow);">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:0.9rem; color:var(--accent); margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.1em;" data-i18n="calc_res_lbl">Jumlah Keseluruhan (Dead + Live Load)</div>
+        <div id="calcResult" style="font-family:'Archivo Black',sans-serif; font-size:3.5rem; color:var(--text); text-shadow: 0 0 20px var(--accent-glow);">0.0 <span style="font-size:1.2rem; color:var(--text-dim);">kg</span></div>
+        <div id="calcWarning" style="margin-top: 1rem; font-size: 0.85rem; font-weight: bold; padding: 0.5rem; border-radius: 4px; display: none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-checklist" class="screen">
+    <button class="back-btn print-hide" onclick="goHome()"><svg class="svg-icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg> <span data-i18n="btn_back">Kembali</span></button>
+    <div class="section-header print-hide">
+      <h2 class="section-title" data-i18n="chk_title">Checklist Tapak Bersepadu</h2>
+      <span class="section-subtitle" data-i18n="chk_sub">Inspeksi Harian Pre-Use</span>
+    </div>
+    
+    <div id="printableChecklist" class="lesson-container">
+      <h2 style="display:none; text-align:center; margin-bottom:1rem; font-family:'Archivo Black', sans-serif;" data-i18n="chk_print_title">LAPORAN INSPEKSI PERANCAH (PRE-USE)</h2>
+      <p id="checklistDateDisplay" style="text-align:right; font-family:'JetBrains Mono', monospace; font-size:0.8rem; color:var(--text-dim); margin-bottom: 1.5rem;"></p>
+      <p class="print-hide" style="margin-bottom:1.5rem; font-size:1rem; color:var(--text-dim);" data-i18n="chk_desc">Sila buat semakan visual berpandukan item di bawah setiap pagi. Data ini akan **disimpan automatik** ke dalam peranti anda.</p>
+      
+      <div id="checklistItemsContainer">
+        <!-- Checklist akan dibuat oleh JavaScript -->
+      </div>
+      
+      <div class="btn-row print-hide" style="margin-top:2.5rem;">
+        <button class="btn secondary" onclick="resetChecklist()"><svg class="svg-icon" style="width:18px;height:18px;" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg> <span data-i18n="btn_reset">Set Semula</span></button>
+        <button class="btn" style="background:var(--success); color:#000;" onclick="printChecklist()"><svg class="svg-icon" style="width:18px;height:18px;" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path></svg> <span data-i18n="btn_pdf">Jana Laporan PDF</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-certificate" class="screen">
+    <button class="back-btn" onclick="goHome()"><svg class="svg-icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg> <span data-i18n="btn_back">Kembali</span></button>
+    <div class="section-header">
+      <h2 class="section-title" data-i18n="cert_title">Sijil Digital</h2>
+      <span class="section-subtitle" data-i18n="cert_sub">Tanda Pencapaian Teori</span>
+    </div>
+
+    <div id="certFormArea" class="lesson-container">
+      <div style="text-align:center; margin-bottom:2rem;">
+        <div class="icon" style="background:var(--accent-glow); color:var(--accent); width:80px; height:80px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem;">
+          <svg class="svg-icon" style="width:40px;height:40px;" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+        </div>
+        <h3 style="font-family:'Archivo Black',sans-serif; font-size:1.5rem; text-transform:uppercase;" data-i18n="cert_form_t">Jana Sijil Anda</h3>
+        <p style="font-size:0.95rem; color:var(--text-dim); margin-top:0.5rem;" data-i18n="cert_form_d">Sila masukkan butiran anda di bawah untuk menjana Sijil Pencapaian Digital yang rasmi.</p>
+      </div>
+      
+      <div style="margin-bottom:1.5rem;">
+        <label style="font-size:0.85rem; color:var(--accent); font-family:'JetBrains Mono',monospace; text-transform:uppercase; font-weight:bold;" data-i18n="cert_lbl_name">Nama Penuh (Huruf Besar)</label>
+        <input type="text" id="certNameInput" data-i18n="cert_ph_name" placeholder="Contoh: AHMAD BIN ALI" class="calc-input" style="padding:1rem; font-size:1.1rem; text-transform: uppercase; margin-top:0.5rem;">
+      </div>
+
+      <div style="margin-bottom:2.5rem;">
+        <label style="font-size:0.85rem; color:var(--accent); font-family:'JetBrains Mono',monospace; text-transform:uppercase; font-weight:bold; display:block; margin-bottom:0.5rem;" data-i18n="cert_lbl_pic">Gambar Profil Sijil (Passport/Swafoto)</label>
+        <input type="file" id="certPhotoInput" accept="image/*" class="calc-input" style="padding:1rem; border:2px dashed var(--accent); cursor:pointer;" onchange="previewCertPhoto(event)">
+        <div style="text-align: center; margin-top: 1.5rem;">
+          <img id="certPreviewImg" src="" style="display:none; width:120px; height:120px; border-radius:50%; object-fit:cover; border:4px solid var(--accent); margin: 0 auto; box-shadow:0 0 20px var(--accent-glow);">
+        </div>
+      </div>
+
+      <button class="btn" onclick="generateCertificate()">
+        <span data-i18n="btn_gen_cert">Jana Sijil Sekarang</span> <svg class="svg-icon" style="width:18px;height:18px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </button>
+    </div>
+
+    <div id="certOutputArea" style="display: none;">
+      <div class="certificate-box">
+        <div class="cert-watermark">S</div>
+        <div class="cert-content-wrap">
+          <div class="cert-serial"><span data-i18n="cert_out_serial">NO. SIRI:</span> <span id="certSerialNum">SFP-2026-0000</span></div>
+          <div class="cert-header" data-i18n="cert_out_head">SIJIL PENCAPAIAN</div>
+          <div class="cert-sub" data-i18n="cert_out_sub">Persediaan Modul Teori Scaffolder Tahap 1</div>
+          <img id="finalCertPhoto" class="cert-photo" src="">
+          <p style="font-size: 1rem; color: #555; margin-bottom: 0.5rem; font-family: 'Playfair Display', serif;" data-i18n="cert_out_certify">Dengan ini disahkan bahawa:</p>
+          <div id="finalCertName" class="cert-name">NAMA PENGGUNA</div>
+          <p class="cert-text" data-i18n="cert_out_text">Telah berjaya melengkapkan modul e-pembelajaran serta lulus cemerlang ujian simulasi teori perancah berdasarkan <strong>Akta Keselamatan dan Kesihatan Pekerjaan 1994 (OSHA)</strong> dan garis panduan teknikal <strong>Piawaian Kemahiran Pekerjaan Kebangsaan (NOSS)</strong>.</p>
+          <div class="cert-footer">
+            <div class="cert-sign-area-left">
+              <span style="color:#777; letter-spacing:0.05em; font-size:0.75rem;" data-i18n="cert_out_date">Dianugerahkan Pada:</span><br>
+              <strong id="finalCertDate" style="font-size:1.1rem; color:#222;"></strong>
+            </div>
+            <div class="cert-sign-area">
+              <div class="fake-sign">ScaffSafe Pro</div>
+              <span style="color:#555; font-size:0.75rem; letter-spacing:0.05em; border-top: 1px solid #aaa; padding-top:8px; display:block; width:100%;" data-i18n="cert_out_sign">Sistem Pengesahan Digital</span>
+            </div>
+          </div>
+        </div>
+        <div class="cert-seal">SCAFFSAFE<br>PRO<br><span>★ CERTIFIED ★</span></div>
+      </div>
+      <div class="btn-row" style="margin-top: 2rem;">
+        <button class="btn" onclick="printCertificate()"><span data-i18n="btn_print_cert">Simpan PDF / Cetak</span> <svg class="svg-icon" style="width:18px;height:18px;" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg></button>
+        <button class="btn secondary" onclick="resetCertificate()" data-i18n="btn_edit_cert">Edit Semula</button>
+      </div>
+      <p style="text-align:center; font-size:0.8rem; color:var(--text-dim); margin-top:1.5rem;" data-i18n="cert_tips">Tips: Anda juga boleh 'Screenshot' sijil ini untuk dikongsi ke WhatsApp!</p>
+    </div>
+  </div>
+
+  <div id="screen-quiz" class="screen">
+    <button class="back-btn" onclick="exitQuiz()"><svg class="svg-icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg> <span data-i18n="btn_exit_quiz">Keluar Kuiz</span></button>
+    <div class="quiz-container">
+      <div class="quiz-header">
+        <span class="quiz-progress-label"><span data-i18n="qz_q">Soalan</span> <span id="currentQNum">1</span> / <span id="totalQNum">5</span></span>
+        <span class="quiz-timer" id="quizTimer">--:--</span>
+      </div>
+      <div class="quiz-question" id="quizQuestion">Loading...</div>
+      <div class="quiz-options" id="quizOptions"></div>
+      <div class="explanation" id="explanation">
+        <div class="explanation-title" data-i18n="qz_exp">Penerangan Fakta</div>
+        <div id="explanationText"></div>
+      </div>
+      <button class="btn" id="nextBtn" onclick="nextQuestion()" disabled data-i18n="btn_confirm_ans">Pilih & Sahkan Jawapan</button>
+    </div>
+  </div>
+
+  <div id="screen-result" class="screen">
+    <div class="result-hero">
+      <div class="result-score" id="resultScore">0%</div>
+      <div class="result-label" data-i18n="res_lbl">Keputusan Pencapaian</div>
+      <div class="result-status" id="resultStatus">LULUS</div>
+    </div>
+    <div class="result-stats">
+      <div class="result-stat">
+        <div class="result-stat-value" id="statCorrect" style="color:var(--success);">0</div>
+        <div class="result-stat-label" data-i18n="res_cor">Tepat</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-value" id="statWrong" style="color:var(--danger);">0</div>
+        <div class="result-stat-label" data-i18n="res_wro">Salah</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-value" id="statTime">0:00</div>
+        <div class="result-stat-label" data-i18n="res_time">Masa</div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn secondary" onclick="goHome()" data-i18n="btn_home">Menu Utama</button>
+      <button class="btn" onclick="retryQuiz()"><span data-i18n="btn_retry">Ulangi Ujian</span> <svg class="svg-icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg></button>
+    </div>
+  </div>
+
+  <div id="screen-search" class="screen">
+    <button class="back-btn" onclick="goHome()"><svg class="svg-icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg> <span data-i18n="btn_back">Kembali</span></button>
+    <div class="section-header">
+      <h2 class="section-title" data-i18n="src_title">Carian Pintar</h2>
+      <span class="section-subtitle" data-i18n="src_sub">Buku Poket Digital</span>
+    </div>
+    <div class="lesson-container" style="padding:1.5rem;">
+      <input type="text" id="searchInput" data-i18n="src_ph" placeholder="Taip carian anda (Cth: Seksyen 15, Load, Base Plate)..." oninput="doSearch()" class="calc-input" style="padding:1.25rem; font-size:1.05rem; margin-bottom:1.5rem;">
+      <div id="searchResults" class="module-list">
+        <div style="text-align:center; padding:2rem 0; color:var(--text-dim); font-size:0.9rem;">
+          <svg class="svg-icon" style="width:40px;height:40px; opacity:0.5; margin-bottom:1rem;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg><br>
+          <span data-i18n="src_emp">Gunakan ruangan di atas untuk mencari maklumat pantas.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-progress" class="screen">
+    <button class="back-btn" onclick="goHome()"><svg class="svg-icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg> <span data-i18n="btn_back">Kembali</span></button>
+    <div class="section-header">
+      <h2 class="section-title" data-i18n="prg_title">Prestasi Aku</h2>
+      <span class="section-subtitle" data-i18n="prg_sub">Statistik Pengguna</span>
+    </div>
+    <div class="result-stats" style="grid-template-columns:repeat(2,1fr); gap:1rem;">
+      <div class="result-stat" style="background:var(--surface-glow); border-color:var(--accent);">
+        <div class="result-stat-value" id="pgModulesDone" style="color:var(--accent);">0 / 13</div>
+        <div class="result-stat-label" data-i18n="prg_mod">Modul Diselesaikan</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-value" id="pgQuizzesDone">0</div>
+        <div class="result-stat-label" data-i18n="prg_qz">Sesi Kuiz Diambil</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-value" id="pgAvgScore">0%</div>
+        <div class="result-stat-label" data-i18n="prg_avg">Purata Markah Ujian</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-value" id="pgStreak">0 <span data-i18n="header_days">Hari</span></div>
+        <div class="result-stat-label" data-i18n="prg_str">Rekod Aktif Konsisten</div>
+      </div>
+    </div>
+    <button class="btn" style="margin-top:1rem;" onclick="showScreen('certificate')"><span data-i18n="btn_view_cert">Lihat Sijil Pencapaian</span> <svg class="svg-icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg></button>
+  </div>
+
+  <div id="screen-about" class="screen">
+    <button class="back-btn" onclick="goHome()"><svg class="svg-icon" style="width:16px;height:16px;" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg> <span data-i18n="btn_back">Kembali</span></button>
+    <div class="lesson-container">
+      <div class="lesson-header" style="text-align:center;">
+        <div class="logo-mark" style="margin:0 auto 1.5rem; width:60px; height:60px; font-size:2rem;">S</div>
+        <h1 class="lesson-title">ScaffSafe Pro</h1>
+        <div class="lesson-breadcrumb" style="margin-top:0.5rem;" data-i18n="abt_ver">Versi Premium 12.0 (Pembetulan PEPenuh)</div>
+      </div>
+      <div class="lesson-body">
+        <p data-i18n="abt_p1"><strong>ScaffSafe Pro</strong> adalah inisiatif platform pembelajaran digital interaktif khas untuk Scaffolder di Malaysia yang komited untuk menduduki peperiksaan tahap kemahiran (Level 1, 2 & 3).</p>
+        
+        <div class="info-box" style="border-left-color:var(--success); background:rgba(0,230,118,0.05);">
+          <div class="info-box-title" style="color:var(--success);" data-i18n="abt_ref_t">Sumber Rujukan Berwibawa</div>
+          <ul style="margin-bottom:0; font-size:0.9rem;">
+            <li data-i18n="abt_ref_1"><strong>Modul Scaffolding Tahap 1</strong> — Rujukan Piawaian Kemahiran Pekerjaan Kebangsaan (NOSS).</li>
+            <li data-i18n="abt_ref_2"><strong>OSHA 1994 (Akta 514)</strong> — Jabatan Keselamatan dan Kesihatan Pekerjaan (JKKP/DOSH) Malaysia.</li>
+          </ul>
+        </div>
+
+        <div class="info-box warning">
+          <div class="info-box-title" data-i18n="abt_warn_t">Peringatan Undang-Undang</div>
+          <span data-i18n="abt_warn_d">Aplikasi ini direka untuk tujuan <strong>ULANGKAJI TEORI & SIMULASI SAHAJA</strong>. Kelulusan cemerlang di dalam aplikasi ini TIDAK melayakkan anda untuk memegang status 'Orang Yang Kompeten'. Untuk pensijilan rasmi yang diiktiraf, anda MESTI mendaftar, hadir, dan lulus ujian amali di pusat bertauliah DOSH / CIDB.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-note" data-i18n="footer">
+    ScaffSafe Pro © 2026 — Dicipta Oleh Anak Bangsa Khas Untuk Scaffolder Malaysia
+  </div>
+</main>
+
+<div id="customModal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title" id="modalTitle">Makluman</div>
+    <div class="modal-message" id="modalMessage">Mesej</div>
+    <div class="modal-buttons">
+      <button class="btn outline" id="modalCancel" style="display:none; width:auto;" onclick="closeModal()" data-i18n="btn_cancel">Batal</button>
+      <button class="btn" id="modalConfirm" style="width:auto;" onclick="closeModal()" data-i18n="btn_confirm">Sahkan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================
+// KAMUS i18n (DWIBAHASA)
+// ============================
+const UI_TEXT = {
+  header_days: { ms: "HARI", en: "DAYS" },
+  hero_label: { ms: "Persediaan Exam DOSH & NOSS", en: "DOSH & NOSS Exam Prep" },
+  hero_title: { ms: "Lulus Exam.<br><span class=\"highlight\">Naik Level.</span>", en: "Pass Exams.<br><span class=\"highlight\">Level Up.</span>" },
+  hero_subtitle: { ms: "Platform e-pembelajaran premium untuk Scaffolder Malaysia. Lengkap dengan modul piawaian NOSS, OSHA 1994, kuiz, dan utiliti tapak binaan.", en: "Premium e-learning platform for Malaysian Scaffolders. Complete with NOSS standard modules, OSHA 1994, quizzes, and site utilities." },
+  widget_prog_title: { ms: "Progress Keseluruhan", en: "Overall Progress" },
+  widget_prog_mod: { ms: "Modul", en: "Modules" },
+  btn_continue: { ms: "Sambung Pembelajaran", en: "Continue Learning" },
+  widget_fact_title: { ms: "Fakta Hari Ini", en: "Fact of the Day" },
+  menu_main: { ms: "Menu Utama", en: "Main Menu" },
+  menu_sub: { ms: "Pilih Tindakan", en: "Select Action" },
+  m_learn_t: { ms: "Modul Belajar", en: "Learning Modules" },
+  m_learn_d: { ms: "Nota Standard & Akta", en: "Standards & Acts" },
+  m_quiz_t: { ms: "Kuiz Harian", en: "Daily Quiz" },
+  m_quiz_d: { ms: "Uji Minda 5 Soalan", en: "Test Your Mind" },
+  m_exam_t: { ms: "Mock Exam", en: "Mock Exam" },
+  m_exam_d: { ms: "Simulasi Peperiksaan", en: "Exam Simulation" },
+  m_search_t: { ms: "Carian Cepat", en: "Quick Search" },
+  m_search_d: { ms: "Buku Poket Pintar", en: "Smart Pocket Book" },
+  m_calc_t: { ms: "Kira Beban", en: "Load Calc" },
+  m_calc_d: { ms: "Kalkulator SWL", en: "SWL Calculator" },
+  m_check_t: { ms: "Checklist Tapak", en: "Site Checklist" },
+  m_check_d: { ms: "Inspeksi Bersepadu", en: "Integrated Inspection" },
+  m_prog_t: { ms: "Progress Aku", en: "My Progress" },
+  m_prog_d: { ms: "Statistik & Rekod", en: "Stats & Records" },
+  m_cert_t: { ms: "Sijil Digital", en: "Digital Cert" },
+  m_cert_d: { ms: "Jana Sijil Pencapaian", en: "Generate Certificate" },
+  m_about_t: { ms: "Tentang App", en: "About App" },
+  m_about_d: { ms: "Info Sistem & Rujukan", en: "System Info & Refs" },
+  btn_back: { ms: "Kembali", en: "Back" },
+  lvl_title: { ms: "Pilih Level", en: "Select Level" },
+  lvl_sub: { ms: "Silibus Berdaftar", en: "Registered Syllabus" },
+  lvl_1_t: { ms: "Scaffolder Peringkat Asas (Level 1)", en: "Basic Scaffolder (Level 1)" },
+  lvl_1_d: { ms: "Asas scaffolding, OSHA Akta 514, pengiraan beban mati, komponen, dan prosedur kerja selamat. Rujukan Piawaian Kebangsaan (NOSS).", en: "Scaffolding basics, OSHA Act 514, dead load calculation, components, and safe work procedures. Based on NOSS standards." },
+  lvl_avail: { ms: "Tersedia", en: "Available" },
+  lvl_2_t: { ms: "Scaffolder Pertengahan (Level 2)", en: "Intermediate Scaffolder (Level 2)" },
+  lvl_2_d: { ms: "Advanced erection, load calculation, bracing, modification inspection.", en: "Advanced erection, load calculation, bracing, modification inspection." },
+  lvl_3_t: { ms: "Penyelia Scaffolder (Level 3)", en: "Scaffold Supervisor (Level 3)" },
+  lvl_3_d: { ms: "Penyeliaan tapak, semakan lukisan reka bentuk, dan penilaian risiko khusus.", en: "Site supervision, design drawing reviews, and specific risk assessments." },
+  lvl_soon: { ms: "Akan Datang", en: "Coming Soon" },
+  btn_mod_list: { ms: "Senarai Modul", en: "Module List" },
+  btn_start_mod_quiz: { ms: "Mula Kuiz Untuk Modul Ini", en: "Start Quiz For This Module" },
+  calc_title: { ms: "Kalkulator Beban Lanjutan", en: "Advanced Load Calculator" },
+  calc_sub: { ms: "Tugasan SWL (Safe Working Load)", en: "SWL Task" },
+  calc_desc: { ms: "Kira nilai <strong>Beban Mati (Dead Load)</strong> komponen fizikal dan tambahkan dengan <strong>Beban Hidup (Live Load)</strong> berdasarkan gred tugas perancah.", en: "Calculate <strong>Dead Load</strong> of physical components and add <strong>Live Load</strong> based on the scaffold duty class." },
+  calc_duty_lbl: { ms: "Kategori Tugas (Beban Hidup / Live Load)", en: "Duty Category (Live Load)" },
+  opt_light: { ms: "Tugas Ringan (Light Duty - 225 kg/bay)", en: "Light Duty (225 kg/bay)" },
+  opt_med: { ms: "Tugas Sederhana (Medium Duty - 450 kg/bay)", en: "Medium Duty (450 kg/bay)" },
+  opt_heavy: { ms: "Tugas Berat (Heavy Duty - 675 kg/bay)", en: "Heavy Duty (675 kg/bay)" },
+  calc_duty_desc: { ms: "Pilih bergantung kepada kegunaan perancah (cth: mengecat = ringan, kerja simen = berat).", en: "Choose based on scaffold usage (e.g. painting = light, concreting = heavy)." },
+  calc_plank: { ms: "Papan/Plank (5.4kg)", en: "Plank (5.4kg)" },
+  calc_guard: { ms: "Guardrail (2.55kg)", en: "Guardrail (2.55kg)" },
+  calc_brace: { ms: "Brace (5.9kg)", en: "Brace (5.9kg)" },
+  calc_base: { ms: "Base Plate (1.4kg)", en: "Base Plate (1.4kg)" },
+  calc_ladder: { ms: "Ladder (2.9kg)", en: "Ladder (2.9kg)" },
+  calc_other: { ms: "Lain-lain (kg)", en: "Others (kg)" },
+  calc_res_lbl: { ms: "Jumlah Keseluruhan (Dead + Live Load)", en: "Total Load (Dead + Live)" },
+  chk_title: { ms: "Checklist Tapak Bersepadu", en: "Integrated Site Checklist" },
+  chk_sub: { ms: "Inspeksi Harian Pre-Use", en: "Daily Pre-Use Inspection" },
+  chk_print_title: { ms: "LAPORAN INSPEKSI PERANCAH (PRE-USE)", en: "SCAFFOLD INSPECTION REPORT (PRE-USE)" },
+  chk_desc: { ms: "Sila buat semakan visual berpandukan item di bawah setiap pagi. Data ini akan **disimpan automatik** ke dalam peranti anda.", en: "Please conduct a visual check based on the items below every morning. Data is **auto-saved** to your device." },
+  btn_reset: { ms: "Set Semula", en: "Reset" },
+  btn_pdf: { ms: "Jana Laporan PDF", en: "Generate PDF Report" },
+  cert_title: { ms: "Sijil Digital", en: "Digital Certificate" },
+  cert_sub: { ms: "Tanda Pencapaian Teori", en: "Theory Achievement Mark" },
+  cert_form_t: { ms: "Jana Sijil Anda", en: "Generate Your Certificate" },
+  cert_form_d: { ms: "Sila masukkan butiran anda di bawah untuk menjana Sijil Pencapaian Digital yang rasmi.", en: "Please enter your details below to generate an official Digital Certificate of Achievement." },
+  cert_lbl_name: { ms: "Nama Penuh (Huruf Besar)", en: "Full Name (Capital Letters)" },
+  cert_ph_name: { ms: "Contoh: AHMAD BIN ALI", en: "Example: AHMAD BIN ALI" },
+  cert_lbl_pic: { ms: "Gambar Profil Sijil (Passport/Swafoto)", en: "Certificate Profile Picture (Passport/Selfie)" },
+  btn_gen_cert: { ms: "Jana Sijil Sekarang", en: "Generate Certificate Now" },
+  cert_out_serial: { ms: "NO. SIRI:", en: "SERIAL NO:" },
+  cert_out_head: { ms: "SIJIL PENCAPAIAN", en: "CERTIFICATE OF ACHIEVEMENT" },
+  cert_out_sub: { ms: "Persediaan Modul Teori Scaffolder Tahap 1", en: "Level 1 Scaffolder Theory Module Preparation" },
+  cert_out_certify: { ms: "Dengan ini disahkan bahawa:", en: "This is to certify that:" },
+  cert_out_text: { ms: "Telah berjaya melengkapkan modul e-pembelajaran serta lulus cemerlang ujian simulasi teori perancah berdasarkan <strong>Akta Keselamatan dan Kesihatan Pekerjaan 1994 (OSHA)</strong> dan garis panduan teknikal <strong>Piawaian Kemahiran Pekerjaan Kebangsaan (NOSS)</strong>.", en: "Has successfully completed the e-learning module and passed with distinction the scaffold theory simulation test based on the <strong>Occupational Safety and Health Act 1994 (OSHA)</strong> and <strong>National Occupational Skill Standard (NOSS)</strong> technical guidelines." },
+  cert_out_date: { ms: "Dianugerahkan Pada:", en: "Awarded On:" },
+  cert_out_sign: { ms: "Sistem Pengesahan Digital", en: "Digital Verification System" },
+  btn_print_cert: { ms: "Simpan PDF / Cetak", en: "Save PDF / Print" },
+  btn_edit_cert: { ms: "Edit Semula", en: "Edit Again" },
+  cert_tips: { ms: "Tips: Anda juga boleh 'Screenshot' sijil ini untuk dikongsi ke WhatsApp!", en: "Tip: You can also 'Screenshot' this certificate to share on WhatsApp!" },
+  btn_exit_quiz: { ms: "Keluar Kuiz", en: "Exit Quiz" },
+  qz_q: { ms: "Soalan", en: "Question" },
+  qz_exp: { ms: "Penerangan Fakta", en: "Fact Explanation" },
+  btn_confirm_ans: { ms: "Pilih & Sahkan Jawapan", en: "Select & Confirm Answer" },
+  res_lbl: { ms: "Keputusan Pencapaian", en: "Achievement Result" },
+  res_cor: { ms: "Tepat", en: "Correct" },
+  res_wro: { ms: "Salah", en: "Wrong" },
+  res_time: { ms: "Masa", en: "Time" },
+  btn_home: { ms: "Menu Utama", en: "Main Menu" },
+  btn_retry: { ms: "Ulangi Ujian", en: "Retry Test" },
+  src_title: { ms: "Carian Pintar", en: "Smart Search" },
+  src_sub: { ms: "Buku Poket Digital", en: "Digital Pocket Book" },
+  src_ph: { ms: "Taip carian anda (Cth: Seksyen 15, Load)...", en: "Type your search (e.g. Section 15, Load)..." },
+  src_emp: { ms: "Gunakan ruangan di atas untuk mencari maklumat pantas.", en: "Use the field above to quickly search for info." },
+  prg_title: { ms: "Prestasi Aku", en: "My Progress" },
+  prg_sub: { ms: "Statistik Pengguna", en: "User Statistics" },
+  prg_mod: { ms: "Modul Diselesaikan", en: "Modules Completed" },
+  prg_qz: { ms: "Sesi Kuiz Diambil", en: "Quizzes Taken" },
+  prg_avg: { ms: "Purata Markah Ujian", en: "Average Test Score" },
+  prg_str: { ms: "Rekod Aktif Konsisten", en: "Consistent Active Record" },
+  btn_view_cert: { ms: "Lihat Sijil Pencapaian", en: "View Certificate of Achievement" },
+  abt_ver: { ms: "Versi Premium 12.0 (Pembetulan PEPenuh)", en: "Premium Version 12.0 (Full Fix)" },
+  abt_p1: { ms: "<strong>ScaffSafe Pro</strong> adalah inisiatif platform pembelajaran digital interaktif khas untuk Scaffolder di Malaysia yang komited untuk menduduki peperiksaan tahap kemahiran (Level 1, 2 & 3).", en: "<strong>ScaffSafe Pro</strong> is an interactive digital learning platform initiative for Scaffolders in Malaysia committed to taking skill level exams (Level 1, 2 & 3)." },
+  abt_ref_t: { ms: "Sumber Rujukan Berwibawa", en: "Authoritative Reference Sources" },
+  abt_ref_1: { ms: "<strong>Modul Scaffolding Tahap 1</strong> — Rujukan Piawaian Kemahiran Pekerjaan Kebangsaan (NOSS).", en: "<strong>Scaffolding Module Level 1</strong> — National Occupational Skill Standard (NOSS) Reference." },
+  abt_ref_2: { ms: "<strong>OSHA 1994 (Akta 514)</strong> — Jabatan Keselamatan dan Kesihatan Pekerjaan (JKKP/DOSH) Malaysia.", en: "<strong>OSHA 1994 (Act 514)</strong> — Department of Occupational Safety and Health (DOSH) Malaysia." },
+  abt_warn_t: { ms: "Peringatan Undang-Undang", en: "Legal Disclaimer" },
+  abt_warn_d: { ms: "Aplikasi ini direka untuk tujuan <strong>ULANGKAJI TEORI & SIMULASI SAHAJA</strong>. Kelulusan cemerlang di dalam aplikasi ini TIDAK melayakkan anda untuk memegang status 'Orang Yang Kompeten'. Untuk pensijilan rasmi yang diiktiraf, anda MESTI mendaftar, hadir, dan lulus ujian amali di pusat bertauliah DOSH / CIDB.", en: "This app is designed for <strong>THEORY REVIEW & SIMULATION ONLY</strong>. Passing excellently in this app DOES NOT qualify you to hold a 'Competent Person' status. For official certification, you MUST register, attend, and pass practical tests at authorized DOSH / CIDB centers." },
+  footer: { ms: "ScaffSafe Pro © 2026 — Dicipta Oleh Anak Bangsa Khas Untuk Scaffolder Malaysia", en: "ScaffSafe Pro © 2026 — Created by Locals especially for Malaysian Scaffolders" },
+  btn_cancel: { ms: "Batal", en: "Cancel" },
+  btn_confirm: { ms: "Sahkan", en: "Confirm" }
+};
+
+// ============================
+// SISTEM AUDIO (Web Audio API)
+// ============================
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playSound(type) {
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  const osc = audioCtx.createOscillator(); const gainNode = audioCtx.createGain();
+  osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+  if (type === 'correct') {
+    osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+  } else if (type === 'wrong') {
+    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.2);
+    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+  }
+}
+
+// ============================
+// SISTEM MODAL
+// ============================
+function showModal(message, type = 'alert', callback = null, titleKey = 'Makluman') {
+  document.getElementById('modalTitle').textContent = typeof titleKey === 'string' && titleKey !== 'Makluman' ? titleKey : (state.lang === 'en' ? 'Notice' : 'Makluman');
+  document.getElementById('modalMessage').innerHTML = message;
+  document.getElementById('customModal').classList.add('active');
+  const btnCancel = document.getElementById('modalCancel');
+  const btnConfirm = document.getElementById('modalConfirm');
+  btnConfirm.onclick = () => { closeModal(); if (callback) callback(); };
+  if (type === 'confirm') { btnCancel.style.display = 'block'; btnCancel.onclick = closeModal; } 
+  else { btnCancel.style.display = 'none'; }
+}
+function closeModal() { document.getElementById('customModal').classList.remove('active'); }
+
+// ============================
+// DATA KONTEN (BANK SOALAN & SVG VEKTOR LENGKAP - 13 MODUL)
+// ============================
+const MODULES = {
+  1: [
+    {
+      id: 'm1-1',
+      title: { ms: 'Modul 1: Akta 514 (OSHA) & Akta 139 (FMA/BOWEC)', en: 'Module 1: Act 514 (OSHA) & Act 139 (FMA/BOWEC)' },
+      content: {
+        ms: `
+          <p>Setiap scaffolder di Malaysia tertakluk di bawah undang-undang <strong>OSHA 1994 (Akta 514)</strong>.</p>
+          <h3>BAHAGIAN IV: Kewajipan Am Majikan</h3>
+          <p><strong>Seksyen 15: Kewajipan Majikan</strong><br>Memastikan keselamatan, kesihatan & kebajikan semasa bekerja; mengadakan sistem kerja yang selamat; dan pengadaan maklumat serta latihan.</p>
+          <p><strong>Seksyen 16: Dasar Keselamatan</strong><br>Menyedia & mengkaji semula kenyataan bertulis dasar am keselamatan & kesihatan.</p>
+          <p><strong>Seksyen 17 & 18: Kewajipan kepada Orang Awam</strong><br>Pastikan orang awam tidak terdedah kepada risiko dari aktiviti tapak.</p>
+          
+          <h3>BAHAGIAN VI: Kewajipan Pekerja (Scaffolder)</h3>
+          <p><strong>Seksyen 24: Kewajipan Am Pekerja</strong></p>
+          <ul>
+            <li>Memberi perhatian munasabah (reasonable care) bagi keselamatan diri dan orang lain.</li>
+            <li>Bekerjasama dengan majikan dan mematuhi undang-undang.</li>
+            <li><strong>Wajib memakai peralatan perlindungan diri (PPE)</strong> yang dibekalkan.</li>
+            <li>Mematuhi arahan keselamatan.</li>
+          </ul>
+          <p><strong>Seksyen 25:</strong> Dilarang mengganggu atau menyalahguna peralatan keselamatan yang sedia ada. (Denda RM20,000 jika disabit).</p>
+
+          <hr style="margin: 1.5rem 0; border-color: var(--border-highlight);">
+          
+          <h3>AKTA KILANG DAN JENTERA 1967 (AKTA 139)</h3>
+          <p>Operasi perancah di Malaysia dikawal secara terperinci oleh <strong>Building Operations and Works of Engineering Construction (Safety) Regulations 1986 (BOWEC)</strong>. Bahagian X dalam BOWEC menerangkan secara jelas hal berkaitan pembinaan perancah melalui <strong>Peraturan (Regulation) 72 - 98</strong>:</p>
+          <div class="info-box">
+            <div class="info-box-title">Senarai Peraturan Penting (Bahagian X - BOWEC 1986):</div>
+            <ul style="font-size:0.85rem; columns: 1;">
+              <li><strong>Regulation 72:</strong> Pembinaan</li>
+              <li><strong>Regulation 73:</strong> Penyelenggaraan</li>
+              <li><strong>Regulation 74:</strong> Penyeliaan kerja dan pemeriksaan komponen</li>
+              <li><strong>Regulation 75:</strong> Reka bentuk, pelan perancah dan kelulusan (Perancah melebihi 15m bagi bukan tubular / melebihi 40m bagi tubular perlu kelulusan Professional Engineer - PE).</li>
+              <li><strong>Regulation 76:</strong> Pemasangan tiang (standard), ledger dan putlog</li>
+              <li><strong>Regulation 85:</strong> Pemeriksaan perancah (Inspection)</li>
+              <li><strong>Regulation 86:</strong> Pelantar kerja</li>
+              <li><strong>Regulation 87:</strong> Papan untuk pemasangan pelantar kerja</li>
+              <li><strong>Regulation 88:</strong> Guard rails dan toe boards</li>
+              <li><strong>Regulation 89:</strong> Pelantar kerja pada permukaan bangunan</li>
+              <li><strong>Regulation 91:</strong> Tube scaffold</li>
+              <li><strong>Regulation 92:</strong> Scaffold locking device</li>
+              <li><strong>Regulation 93:</strong> Locking device materials</li>
+              <li><strong>Regulation 94:</strong> Pemasangan perancah tubular</li>
+              <li><strong>Regulation 95:</strong> Saiz tiub perancah</li>
+              <li><strong>Regulation 97:</strong> Bracing / Rembat</li>
+            </ul>
+          </div>
+        `,
+        en: `
+          <p>Every scaffolder in Malaysia is bound by <strong>OSHA 1994 (Act 514)</strong> law.</p>
+          <h3>PART IV: General Duties of Employers</h3>
+          <p><strong>Section 15: Duties of Employers</strong><br>Ensuring safety, health & welfare at work; providing a safe system of work; and providing information and training.</p>
+          <p><strong>Section 16: Safety Policy</strong><br>Prepare and revise a written statement of general safety and health policy.</p>
+          <p><strong>Section 17 & 18: Duties to the Public</strong><br>Ensure the public is not exposed to risks from site activities.</p>
+
+          <h3>PART VI: General Duties of Employees (Scaffolders)</h3>
+          <p><strong>Section 24: General Duties of Employees</strong></p>
+          <ul>
+            <li>Taking reasonable care for their own safety and others.</li>
+            <li>Cooperating with the employer and complying with laws.</li>
+            <li><strong>Mandatory wearing of personal protective equipment (PPE)</strong> provided.</li>
+            <li>Complying with safety instructions.</li>
+          </ul>
+          <p><strong>Section 25:</strong> Forbidden to interfere with or misuse existing safety equipment. (Fine RM20,000 if convicted).</p>
+
+          <hr style="margin: 1.5rem 0; border-color: var(--border-highlight);">
+          
+          <h3>FACTORIES AND MACHINERY ACT 1967 (ACT 139)</h3>
+          <p>Scaffolding operations in Malaysia are detailed by the <strong>Building Operations and Works of Engineering Construction (Safety) Regulations 1986 (BOWEC)</strong>. Part X in BOWEC clearly explains scaffolding construction through <strong>Regulations 72 - 98</strong>:</p>
+          <div class="info-box">
+            <div class="info-box-title">Important Regulations List (Part X - BOWEC 1986):</div>
+            <ul style="font-size:0.85rem; columns: 1;">
+              <li><strong>Regulation 72:</strong> Construction</li>
+              <li><strong>Regulation 73:</strong> Maintenance</li>
+              <li><strong>Regulation 74:</strong> Supervision of work and inspection of material</li>
+              <li><strong>Regulation 75:</strong> Design, plan of scaffold and approval (Scaffolds exceeding 15m/40m need PE approval).</li>
+              <li><strong>Regulation 76:</strong> Erection of standard, ledger and putlog</li>
+              <li><strong>Regulation 85:</strong> Inspection of scaffolds</li>
+              <li><strong>Regulation 86:</strong> Working platforms</li>
+              <li><strong>Regulation 87:</strong> Boards for working platforms</li>
+              <li><strong>Regulation 88:</strong> Guard-rails and toe boards</li>
+              <li><strong>Regulation 89:</strong> Working platforms at building face</li>
+              <li><strong>Regulation 91:</strong> Tube scaffold</li>
+              <li><strong>Regulation 92:</strong> Scaffold locking device</li>
+              <li><strong>Regulation 93:</strong> Locking device materials</li>
+              <li><strong>Regulation 94:</strong> Tubular scaffold erection</li>
+              <li><strong>Regulation 95:</strong> Scaffold tube size</li>
+              <li><strong>Regulation 97:</strong> Bracing</li>
+            </ul>
+          </div>
+        `
+      },
+      quiz: [
+        { 
+          q: { ms: "Apakah akta yang menerangkan secara spesifik peraturan-peraturan pembinaan perancah di Malaysia?", en: "Which act specifically outlines scaffold construction rules in Malaysia?" }, 
+          options: { ms: ["Akta Kilang dan Jentera (BOWEC 1986)", "Akta Pembangunan Industri 1994", "Akta Keselamatan dan Kesihatan Pekerjaan 1994", "Akta Buruh dan Pekerja 1955"], en: ["Factories and Machinery Act (BOWEC 1986)", "Industrial Development Act 1994", "Occupational Safety and Health Act 1994", "Labor and Worker Act 1955"] }, answer: 0, 
+          explanation: { ms: "Peraturan BOWEC 1986 (Bahagian X) digazetkan di bawah Akta Kilang dan Jentera 1967 (FMA Act 139) khusus untuk kerja pembinaan teknikal.", en: "BOWEC 1986 Regulations (Part X) are gazetted under the Factories and Machinery Act 1967 (FMA Act 139) specifically for technical construction works." } 
+        },
+        { 
+          q: { ms: "Bilakah Peraturan BOWEC (Building Operations and Works of Engineering Construction) diwartakan?", en: "When was the BOWEC (Building Operations and Works of Engineering Construction) Regulation gazetted?" }, 
+          options: { ms: ["1 Februari 1986", "1 Oktober 1986", "1 Januari 1986", "1 September 1986"], en: ["1 February 1986", "1 October 1986", "1 January 1986", "1 September 1986"] }, answer: 1, 
+          explanation: { ms: "Peraturan BOWEC telah mula diwartakan secara rasmi pada 1 hb Oktober 1986.", en: "The BOWEC Regulations were officially gazetted on October 1st, 1986." } 
+        },
+        { 
+          q: { ms: "Apakah yang dimaksudkan dengan istilah 'Hazard' di dalam perundangan keselamatan (legislation)?", en: "What is the meaning of the term 'Hazard' in safety legislation?" }, 
+          options: { ms: ["Bila berlakunya sesuatu objek terjatuh dari tempat yang tinggi", "Suatu keadaan di tempat kerja yang berkemungkinan mencederakan pekerja atau kerosakan harta benda", "Kawasan kerja yang berisiko berlakunya kemalangan", "Suatu keadaan di mana peralatan keselamatan boleh digunakan"], en: ["When an object falls from a high place", "A condition at the workplace that is likely to injure workers or damage property", "A work area at risk of an accident", "A situation where safety equipment can be used"] }, answer: 1, 
+          explanation: { ms: "Hazard ialah apa-apa punca atau keadaan yang mempunyai potensi mendatangkan kecederaan, penyakit, atau kerosakan harta benda.", en: "A Hazard is any source or situation with the potential to cause injury, illness, or property damage." } 
+        },
+        { 
+          q: { ms: "Di bawah Peraturan BOWEC 1986, Regulation berapakah yang mewajibkan pemasangan 'Guard rails dan toe boards' pada pelantar perancah?", en: "Under the BOWEC 1986 Regulations, which Regulation mandates the installation of 'Guard rails and toe boards' on scaffold platforms?" }, 
+          options: { ms: ["Regulation 74", "Regulation 85", "Regulation 88", "Regulation 97"], en: ["Regulation 74", "Regulation 85", "Regulation 88", "Regulation 97"] }, answer: 2, 
+          explanation: { ms: "Regulation 88 mensyaratkan pagar penghadang dan papan pacak wajib dipasang di setiap sisi terbuka pelantar kerja.", en: "Regulation 88 requires guard rails and toe boards to be installed at every open side of a working platform." } 
+        },
+        { 
+          q: { ms: "Menurut Peraturan 75 BOWEC, pemasangan perancah selain daripada jenis tubular yang ketinggiannya melebihi 15 meter (atau perancah tubular melebihi 40 meter) perlu mendapat reka bentuk yang diluluskan oleh siapa?", en: "According to Regulation 75 of BOWEC, the erection of scaffolds other than tubular exceeding 15 meters (or tubular scaffolds exceeding 40 meters) must have designs approved by who?" }, 
+          options: { ms: ["Project Manager (PM)", "Professional Architect (PA)", "Professional Engineer (PE)", "Project Director (PD)"], en: ["Project Manager (PM)", "Professional Architect (PA)", "Professional Engineer (PE)", "Project Director (PD)"] }, answer: 2, 
+          explanation: { ms: "Struktur yang sangat tinggi (Melebihi 40m bagi tubular) WAJIB direka dan disahkan selamat oleh Professional Engineer.", en: "Very tall structures (Over 40m for tubular) MUST be designed and certified safe by a Professional Engineer." } 
+        },
+        { 
+          q: { ms: "Menurut OSHA 1994, Seksyen berapakah yang mewajibkan pekerja (termasuk scaffolder) memakai PPE di tapak binaan?", en: "According to OSHA 1994, which Section mandates employees (including scaffolders) to wear PPE on site?" }, 
+          options: { ms: ["Seksyen 15", "Seksyen 17", "Seksyen 24", "Seksyen 25"], en: ["Section 15", "Section 17", "Section 24", "Section 25"] }, answer: 2, 
+          explanation: { ms: "Seksyen 24 menerangkan tanggungjawab pekerja termasuk wajib memakai PPE.", en: "Section 24 explains employee responsibilities including the mandatory use of PPE." } 
+        },
+        { 
+          q: { ms: "Apakah penalti maksimum bagi majikan jika melanggar Seksyen 15 (gagal menyediakan persekitaran selamat)?", en: "What is the maximum penalty for an employer if they violate Section 15 (failing to provide a safe environment)?" }, 
+          options: { ms: ["Denda RM 10,000", "Denda RM 20,000", "Denda RM 50,000 atau penjara 2 tahun", "Amaran lisan"], en: ["Fine RM 10,000", "Fine RM 20,000", "Fine RM 50,000 or 2 years jail", "Verbal warning"] }, answer: 2, 
+          explanation: { ms: "Di bawah Seksyen 19, penalti bagi majikan yang gagal patuh adalah RM50,000 atau penjara sehingga 2 tahun.", en: "Under Section 19, the penalty for employers who fail to comply is RM50,000 or imprisonment up to 2 years." } 
+        }
+      ]
+    },
+    {
+      id: 'm1-2',
+      title: { ms: 'Modul 2: Definisi & Komponen Asas Perancah', en: 'Module 2: Definition & Basic Scaffold Components' },
+      content: {
+        ms: `
+          <h3>Kategori Independent Scaffold</h3>
+          <ul>
+            <li><strong>Frame Scaffold:</strong> Struktur siap pateri (H-Frame).</li>
+            <li><strong>Tubular Scaffold (Pipe & Coupler):</strong> Sambungan paip dan clamp yang sangat fleksibel.</li>
+            <li><strong>Modular Scaffold (System):</strong> Sistem moden bersegmen (contoh: Ringlock, Cuplock).</li>
+            <li><strong>Mobile Scaffold:</strong> Perancah mudah alih beroda (Caster wheel).</li>
+            <li><strong>Tower Scaffold:</strong> Perancah tinggi jenis menara.</li>
+          </ul>
+
+          <h3>Definisi & Kegunaan Perancah (SLAPS)</h3>
+          <p>Perancah ialah struktur sementara bagi kegunaan tertentu. Ingat akronim <strong>SLAPS</strong>:</p>
+          <ul>
+            <li><strong>S (Support):</strong> Menyokong kerja acuan atau lantai.</li>
+            <li><strong>L (Leading):</strong> Pelantar sementara untuk letak bahan.</li>
+            <li><strong>A (Access):</strong> Laluan sementara yang selamat.</li>
+            <li><strong>P (Protection):</strong> Pelindung jatuh objek (catch platform).</li>
+            <li><strong>S (Storage):</strong> Tempat simpanan bahan / rak.</li>
+          </ul>
+
+          <div class="svg-diagram-box">
+            <svg viewBox="0 0 200 150">
+              <!-- Ground -->
+              <line x1="10" y1="140" x2="190" y2="140" stroke="#555" stroke-width="4"/>
+              <!-- Standards -->
+              <line x1="50" y1="20" x2="50" y2="138" stroke="#FF6B00" stroke-width="6"/>
+              <line x1="150" y1="20" x2="150" y2="138" stroke="#FF6B00" stroke-width="6"/>
+              <!-- Ledgers -->
+              <line x1="40" y1="60" x2="160" y2="60" stroke="#00E676" stroke-width="5"/>
+              <line x1="40" y1="100" x2="160" y2="100" stroke="#00E676" stroke-width="5"/>
+              <!-- Brace -->
+              <line x1="50" y1="100" x2="150" y2="60" stroke="#3498db" stroke-width="4" stroke-dasharray="4"/>
+              
+              <text x="50" y="15" fill="#FF6B00" font-size="10" text-anchor="middle" font-family="monospace">STANDARD</text>
+              <text x="100" y="55" fill="#00E676" font-size="10" text-anchor="middle" font-family="monospace">LEDGER</text>
+              <text x="100" y="90" fill="#3498db" font-size="10" text-anchor="middle" font-family="monospace">BRACE</text>
+            </svg>
+            <div class="caption">Rajah 1.0: Anatomi Asas Perancah Tubular</div>
+          </div>
+
+          <h3>Spesifikasi Tiub (BS 1139)</h3>
+          <p>Tiub besi hitam / Galvanized standard mesti bergarispusat luar <strong>48.3 mm</strong> dengan ketebalan dinding <strong>4.0 mm</strong>. Berat paip standard bergalvani ialah 4.52 kg/meter.</p>
+          
+          <div class="svg-diagram-box">
+            <svg viewBox="0 0 300 120">
+              <!-- Normal -->
+              <rect x="30" y="20" width="20" height="80" fill="#888" />
+              <text x="40" y="115" fill="#ccc" font-size="10" text-anchor="middle">Normal</text>
+              <!-- Bent -->
+              <path d="M90 20 Q110 60 90 100" fill="none" stroke="#e74c3c" stroke-width="20" />
+              <text x="100" y="115" fill="#ccc" font-size="10" text-anchor="middle">Bengkok (Bent)</text>
+              <!-- Mushroom -->
+              <rect x="150" y="30" width="20" height="70" fill="#888" />
+              <path d="M140 30 Q160 10 180 30" fill="#e74c3c" />
+              <text x="160" y="115" fill="#ccc" font-size="10" text-anchor="middle">Mushroom</text>
+              <!-- Split -->
+              <rect x="210" y="20" width="20" height="80" fill="#888" />
+              <line x1="220" y1="30" x2="220" y2="60" stroke="#111" stroke-width="4" />
+              <text x="220" y="115" fill="#ccc" font-size="10" text-anchor="middle">Retak (Split)</text>
+            </svg>
+            <div class="caption">Rajah 1.1: Jenis Kerosakan Tiub (Dilarang Guna)</div>
+          </div>
+        `,
+        en: `
+          <h3>Independent Scaffold Categories</h3>
+          <ul>
+            <li><strong>Frame Scaffold:</strong> Pre-welded structure (H-Frame).</li>
+            <li><strong>Tubular Scaffold (Pipe & Coupler):</strong> Highly flexible pipe and clamp connections.</li>
+            <li><strong>Modular Scaffold (System):</strong> Modern segmented systems (e.g., Ringlock, Cuplock).</li>
+            <li><strong>Mobile Scaffold:</strong> Movable scaffold with caster wheels.</li>
+            <li><strong>Tower Scaffold:</strong> Tall tower-type scaffold.</li>
+          </ul>
+
+          <h3>Definition & Uses of Scaffold (SLAPS)</h3>
+          <p>Scaffold is a temporary structure. Remember the acronym <strong>SLAPS</strong>:</p>
+          <ul>
+            <li><strong>S (Support):</strong> Supports formwork or floors.</li>
+            <li><strong>L (Leading):</strong> Temporary platform for materials.</li>
+            <li><strong>A (Access):</strong> Safe temporary access routes.</li>
+            <li><strong>P (Protection):</strong> Falling object protection (catch platform).</li>
+            <li><strong>S (Storage):</strong> Material storage or racks.</li>
+          </ul>
+          
+          <div class="svg-diagram-box">
+            <svg viewBox="0 0 200 150">
+              <line x1="10" y1="140" x2="190" y2="140" stroke="#555" stroke-width="4"/>
+              <line x1="50" y1="20" x2="50" y2="138" stroke="#FF6B00" stroke-width="6"/>
+              <line x1="150" y1="20" x2="150" y2="138" stroke="#FF6B00" stroke-width="6"/>
+              <line x1="40" y1="60" x2="160" y2="60" stroke="#00E676" stroke-width="5"/>
+              <line x1="40" y1="100" x2="160" y2="100" stroke="#00E676" stroke-width="5"/>
+              <line x1="50" y1="100" x2="150" y2="60" stroke="#3498db" stroke-width="4" stroke-dasharray="4"/>
+              <text x="50" y="15" fill="#FF6B00" font-size="10" text-anchor="middle" font-family="monospace">STANDARD</text>
+              <text x="100" y="55" fill="#00E676" font-size="10" text-anchor="middle" font-family="monospace">LEDGER</text>
+              <text x="100" y="90" fill="#3498db" font-size="10" text-anchor="middle" font-family="monospace">BRACE</text>
+            </svg>
+            <div class="caption">Diagram 1.0: Basic Tubular Scaffold Anatomy</div>
+          </div>
+
+          <h3>Tube Specification (BS 1139)</h3>
+          <p>Standard black/galvanized steel tubes must have an outer diameter of <strong>48.3 mm</strong> and wall thickness of <strong>4.0 mm</strong>. The weight of a standard galvanized tube is 4.52 kg/meter.</p>
+          
+          <div class="svg-diagram-box">
+            <svg viewBox="0 0 300 120">
+              <rect x="30" y="20" width="20" height="80" fill="#888" />
+              <text x="40" y="115" fill="#ccc" font-size="10" text-anchor="middle">Normal</text>
+              <path d="M90 20 Q110 60 90 100" fill="none" stroke="#e74c3c" stroke-width="20" />
+              <text x="100" y="115" fill="#ccc" font-size="10" text-anchor="middle">Bent</text>
+              <rect x="150" y="30" width="20" height="70" fill="#888" />
+              <path d="M140 30 Q160 10 180 30" fill="#e74c3c" />
+              <text x="160" y="115" fill="#ccc" font-size="10" text-anchor="middle">Mushroom</text>
+              <rect x="210" y="20" width="20" height="80" fill="#888" />
+              <line x1="220" y1="30" x2="220" y2="60" stroke="#111" stroke-width="4" />
+              <text x="220" y="115" fill="#ccc" font-size="10" text-anchor="middle">Split</text>
+            </svg>
+            <div class="caption">Diagram 1.1: Types of Tube Defects (Do Not Use)</div>
+          </div>
+        `
+      },
+      quiz: [
+        { 
+          q: { ms: "Apakah rujukan Standard British (British Standard) yang digunapakai bagi kelulusan komponen paip perancah tubular?", en: "What is the British Standard reference applied for the approval of tubular scaffold pipe components?" }, 
+          options: { ms: ["BS 2482", "BS 1139", "BS 1129", "BS 5240"], en: ["BS 2482", "BS 1139", "BS 1129", "BS 5240"] }, answer: 1, 
+          explanation: { ms: "Spesifikasi kualiti dan dimensi paip tubular perancah besi adalah di bawah ketetapan BS 1139.", en: "The quality and dimensional specifications for steel tubular scaffold pipes fall under the BS 1139 standard." } 
+        },
+        { 
+          q: { ms: "Berapakah garispusat luar (Outer Diameter) bagi sebatang paip GI perancah standard BS1139?", en: "What is the Outer Diameter (OD) of a standard BS1139 GI scaffold pipe?" }, 
+          options: { ms: ["40.5 mm", "48.3 mm", "50.0 mm", "55.0 mm"], en: ["40.5 mm", "48.3 mm", "50.0 mm", "55.0 mm"] }, answer: 1, 
+          explanation: { ms: "Mengikut piawaian antarabangsa, saiz ukuran luar paip tubular adalah tepat 48.3mm.", en: "According to international standards, the outer measurement of a tubular pipe is exactly 48.3mm." } 
+        },
+        { 
+          q: { ms: "Berapakah ketebalan dinding besi (wall thickness) yang diwajibkan untuk paip perancah tubular mengikut standard BS1139?", en: "What is the required wall thickness for a tubular scaffold pipe according to BS1139 standard?" }, 
+          options: { ms: ["2.0 mm", "3.2 mm", "4.0 mm", "4.8 mm"], en: ["2.0 mm", "3.2 mm", "4.0 mm", "4.8 mm"] }, answer: 2, 
+          explanation: { ms: "Ketebalan paip yang mematuhi standard industri kekuatan beban tegak ialah 4.0mm.", en: "The pipe thickness that complies with industry standards for vertical load strength is 4.0mm." } 
+        },
+        { 
+          q: { ms: "Apakah jenis kerosakan paip tubular yang terbentuk seperti payung di hujungnya akibat selalu diketuk kuat?", en: "What type of tubular pipe defect forms like an umbrella at its end due to frequent heavy hammering?" }, 
+          options: { ms: ["Mushroom", "Split", "Bent", "Cross Cut"], en: ["Mushroom", "Split", "Bent", "Cross Cut"] }, answer: 0, 
+          explanation: { ms: "Kerosakan ini dipanggil 'Mushrooming' (mengembang seperti cendawan) yang mana menghalang coupler dari masuk.", en: "This defect is called 'Mushrooming' (expanding like a mushroom) which prevents the coupler from sliding in." } 
+        },
+        { 
+          q: { ms: "Komponen perancah manakah yang diletakkan paling bawah bersentuhan dengan permukaan tanah bagi mengelakkan tiang mendap?", en: "Which scaffold component is placed at the very bottom in contact with the ground surface to prevent the pole from sinking?" }, 
+          options: { ms: ["Transom", "Putlog", "Base Plate & Sole Board", "Brace"], en: ["Transom", "Putlog", "Base Plate & Sole Board", "Brace"] }, answer: 2, 
+          explanation: { ms: "Base plate mengagihkan beban tiang, dan sole board (papan lapik) membesarkan lagi luas agihan di tanah lembut.", en: "The base plate distributes the pole's load, and the sole board further increases the distribution area on soft ground." } 
+        },
+        { 
+          q: { ms: "Apakah jenis perancah yang mempunyai roda (caster wheel) di bahagian bawah untuk memudahkannya dialihkan?", en: "What type of scaffold has wheels (caster wheels) at the bottom to make it easily movable?" }, 
+          options: { ms: ["Frame Scaffold", "Modular Scaffold", "Mobile Scaffold", "Suspended Scaffold"], en: ["Frame Scaffold", "Modular Scaffold", "Mobile Scaffold", "Suspended Scaffold"] }, answer: 2, 
+          explanation: { ms: "Mobile scaffold direka khusus dengan roda untuk tugasan yang memerlukan perpindahan pantas.", en: "Mobile scaffold is specifically designed with wheels for tasks requiring quick relocation." } 
+        }
+      ]
+    },
+    {
+      id: 'm1-3',
+      title: { ms: 'Modul 3: Pengganding (Couplers) & Papan', en: 'Module 3: Couplers & Planks' },
+      content: {
+        ms: `
+          <h3>Kekuatan Pengganding (Couplers SWL)</h3>
+          <ul style="font-family:'JetBrains Mono', monospace; font-size:0.9rem;">
+            <li><strong>Tetap (Double/Right Angle):</strong> 6.25kN (Mendatar)</li>
+            <li><strong>Boleh Pusing (Swivel):</strong> 6.25kN</li>
+            <li><strong>Putlog Coupler (Single):</strong> 0.53kN <span style="color:var(--danger);">(Hanya ikat lantai/transom ke ledger, bukan penahan berat utama!)</span></li>
+          </ul>
+          
+          <div class="info-box">
+            <div class="info-box-title">Penyambung Paip Lurus (End-to-End):</div>
+            <ul>
+              <li><strong>Joint Pin:</strong> Dimasukkan ke DALAM rongga paip. Bertindak sebagai pin sambungan sejajar.</li>
+              <li><strong>Sleeve Coupler:</strong> Membalut dari bahagian LUAR paip. SWL lebih tinggi.</li>
+            </ul>
+          </div>
+
+          <div class="svg-diagram-box">
+            <svg viewBox="0 0 300 120">
+              <!-- Right Angle -->
+              <rect x="50" y="20" width="15" height="70" fill="#FF6B00" />
+              <rect x="20" y="45" width="75" height="15" fill="#00E676" />
+              <circle cx="57.5" cy="52.5" r="10" fill="#aaa" />
+              <text x="57.5" y="110" fill="#ccc" font-size="10" text-anchor="middle">Right Angle (Tetap)</text>
+              <!-- Swivel -->
+              <rect x="150" y="20" width="15" height="70" fill="#FF6B00" transform="rotate(20 157.5 52.5)" />
+              <rect x="120" y="45" width="75" height="15" fill="#00E676" />
+              <circle cx="157.5" cy="52.5" r="10" fill="#aaa" />
+              <circle cx="157.5" cy="52.5" r="4" fill="#111" />
+              <text x="157.5" y="110" fill="#ccc" font-size="10" text-anchor="middle">Swivel (Pusing)</text>
+              <!-- Sleeve -->
+              <rect x="230" y="20" width="15" height="30" fill="#3498db" />
+              <rect x="230" y="60" width="15" height="30" fill="#3498db" />
+              <rect x="225" y="40" width="25" height="30" fill="#aaa" />
+              <text x="237.5" y="110" fill="#ccc" font-size="10" text-anchor="middle">Sleeve</text>
+            </svg>
+            <div class="caption">Rajah 2.0: Jenis-Jenis Couplers</div>
+          </div>
+
+          <h3>Spesifikasi Papan Pelantar (Planks - BS 2482)</h3>
+          <p>Berdasarkan standard British BS 2482, papan perancah kayu mesti mempunyai ketebalan minima <strong>38mm</strong> dan kelebaran <strong>225mm</strong>. Panjang maksimum ialah 3.9 meter.</p>
+          <div class="info-box warning">
+            <div class="info-box-title">Syarat Penjagaan & Bukaan Papan:</div>
+            <ul>
+              <li>Papan mesti dilindungi di kedua-dua hujungnya dengan plat besi <strong>Hoop Iron</strong> untuk mengelakkan hujung kayu pecah/retak.</li>
+              <li>Bukaan kelebaran minimum untuk kegunaan laluan pekerja (access) sahaja wajib sekurang-kurangnya <strong>635 mm (3 keping papan)</strong>.</li>
+              <li>Untuk kerja berserta bahan, minimum <strong>860 mm (4 keping)</strong>.</li>
+              <li>Celah antara papan pelantar maksimum dibenarkan ialah 10mm.</li>
+            </ul>
+          </div>
+        `,
+        en: `
+          <h3>Coupler Strength (SWL)</h3>
+          <ul style="font-family:'JetBrains Mono', monospace; font-size:0.9rem;">
+            <li><strong>Fixed / Double Coupler:</strong> 6.25kN</li>
+            <li><strong>Swivel:</strong> 6.25kN</li>
+            <li><strong>Putlog Coupler (Single head):</strong> 0.53kN <span style="color:var(--danger);">(For platforms/transoms only, not main load-bearing!)</span></li>
+          </ul>
+
+          <div class="info-box">
+            <div class="info-box-title">End-to-End Pipe Joiners:</div>
+            <ul>
+              <li><strong>Joint Pin:</strong> Inserted INSIDE the pipe cavity. Acts as an internal alignment pin.</li>
+              <li><strong>Sleeve Coupler:</strong> Wraps around the OUTSIDE of the pipe. Higher SWL.</li>
+            </ul>
+          </div>
+
+          <div class="svg-diagram-box">
+            <svg viewBox="0 0 300 120">
+              <!-- Right Angle -->
+              <rect x="50" y="20" width="15" height="70" fill="#FF6B00" />
+              <rect x="20" y="45" width="75" height="15" fill="#00E676" />
+              <circle cx="57.5" cy="52.5" r="10" fill="#aaa" />
+              <text x="57.5" y="110" fill="#ccc" font-size="10" text-anchor="middle">Right Angle</text>
+              <!-- Swivel -->
+              <rect x="150" y="20" width="15" height="70" fill="#FF6B00" transform="rotate(20 157.5 52.5)" />
+              <rect x="120" y="45" width="75" height="15" fill="#00E676" />
+              <circle cx="157.5" cy="52.5" r="10" fill="#aaa" />
+              <circle cx="157.5" cy="52.5" r="4" fill="#111" />
+              <text x="157.5" y="110" fill="#ccc" font-size="10" text-anchor="middle">Swivel</text>
+              <!-- Sleeve -->
+              <rect x="230" y="20" width="15" height="30" fill="#3498db" />
+              <rect x="230" y="60" width="15" height="30" fill="#3498db" />
+              <rect x="225" y="40" width="25" height="30" fill="#aaa" />
+              <text x="237.5" y="110" fill="#ccc" font-size="10" text-anchor="middle">Sleeve</text>
+            </svg>
+            <div class="caption">Diagram 2.0: Types of Couplers</div>
+          </div>
+
+          <h3>Plank Specifications (BS 2482)</h3>
+          <p>Based on British Standard BS 2482, timber scaffold boards must have a minimum thickness of <strong>38mm</strong> and width of <strong>225mm</strong>. Maximum length is 3.9 meters.</p>
+          <div class="info-box warning">
+            <div class="info-box-title">Plank Maintenance & Gap Rules:</div>
+            <ul>
+              <li>Planks must be protected at both ends with <strong>Hoop Iron</strong> plates to prevent the wood ends from splitting/cracking.</li>
+              <li>The minimum width opening for worker access only must be at least <strong>635 mm (3 planks)</strong>.</li>
+              <li>For work with materials, the minimum is <strong>860 mm (4 planks)</strong>.</li>
+              <li>The maximum allowable gap between platform planks is 10mm.</li>
+            </ul>
+          </div>
+        `
+      },
+      quiz: [
+        { 
+          q: { ms: "Apakah rujukan Standard British (British Standard) yang digunapakai bagi papan perancah kayu (Timber Scaffold Board)?", en: "What is the British Standard reference applied for timber scaffold boards?" }, 
+          options: { ms: ["BS 1139", "BS 2482", "BS 1129", "BS 5240"], en: ["BS 1139", "BS 2482", "BS 1129", "BS 5240"] }, answer: 1, 
+          explanation: { ms: "Spesifikasi kualiti dan dimensi papan kayu tertakluk di bawah standard antarabangsa BS 2482.", en: "The quality and dimensional specifications for timber boards fall under the international standard BS 2482." } 
+        },
+        { 
+          q: { ms: "Berdasarkan rujukan BS2482, berapakah standard ketebalan dan kelebaran sekeping papan perancah kayu?", en: "Based on BS2482 reference, what is the standard thickness and width of a timber scaffold board?" }, 
+          options: { ms: ["Tebal 32mm, Lebar 200mm", "Tebal 38mm, Lebar 225mm", "Tebal 50mm, Lebar 300mm", "Tebal 25mm, Lebar 150mm"], en: ["Thick 32mm, Width 200mm", "Thick 38mm, Width 225mm", "Thick 50mm, Width 300mm", "Thick 25mm, Width 150mm"] }, answer: 1, 
+          explanation: { ms: "Nota spesifikasi menetapkan ukuran 38mm ketebalan dan 225mm kelebaran bagi papan kayu (Timber scaffold boards).", en: "Specification notes set the dimensions at 38mm thickness and 225mm width for timber scaffold boards." } 
+        },
+        { 
+          q: { ms: "Berapa kepingkah papan minimum yang perlu dipasang untuk membina pelantar laluan pekerja sahaja (access only)?", en: "What is the minimum number of planks that need to be installed to build a worker access platform only?" }, 
+          options: { ms: ["1 Keping", "2 Keping", "3 Keping", "4 Keping"], en: ["1 Plank", "2 Planks", "3 Planks", "4 Planks"] }, answer: 2, 
+          explanation: { ms: "Piawaian menetapkan laluan berjalan pekerja perlu sekurang-kurangnya selebar 635mm (anggaran bersamaan 3 keping papan disusun rapat).", en: "Standards dictate that worker walkways must be at least 635mm wide (approximately 3 planks tightly laid)." } 
+        },
+        { 
+          q: { ms: "Apakah jenis pengganding (coupler) yang MESTI digunakan bagi pemasangan ikatan dinding (ties) ke struktur bangunan?", en: "Which type of coupler MUST be used for installing wall ties to the building structure?" }, 
+          options: { ms: ["Putlog Coupler", "Sleeve Coupler", "Swivel Coupler", "Right Angle Coupler (Pengganding Tetap)"], en: ["Putlog Coupler", "Sleeve Coupler", "Swivel Coupler", "Right Angle Coupler"] }, answer: 3, 
+          explanation: { ms: "Ties memerlukan ikatan kaku (rigid) 90 darjah untuk mengekang pergerakan struktur, menjadikan Right Angle Coupler pilihan wajib.", en: "Ties require a rigid 90-degree bond to restrain structural movement, making Right Angle Coupler the mandatory choice." } 
+        },
+        { 
+          q: { ms: "Apakah nama penyambung besi yang diletakkan di bahagian DALAM dua batang paip lurus untuk mencantumkannya?", en: "What is the name of the metal joiner placed INSIDE two straight pipes to connect them?" }, 
+          options: { ms: ["Sleeve Coupler", "Double Coupler", "Joint Pin", "Swivel Coupler"], en: ["Sleeve Coupler", "Double Coupler", "Joint Pin", "Swivel Coupler"] }, answer: 2, 
+          explanation: { ms: "Joint pin masuk ke dalam rongga paip (internal), manakala Sleeve membalut dari luar.", en: "A Joint pin goes inside the pipe cavity (internal), while a Sleeve wraps from the outside." } 
+        }
+      ]
+    },
+    {
+      id: 'm1-4',
+      title: { ms: 'Modul 4: Pengiraan Beban & Tapak (SWL)', en: 'Module 4: Load Calculation & Base (SWL)' },
+      content: {
+        ms: `
+          <h3>Konsep Beban Kerja Selamat (SWL)</h3>
+          <div class="checklist-box">
+            <div class="checklist-item"><strong>Dead Load (Beban Mati):</strong> Berat komponen statik.</div>
+            <div class="checklist-item"><strong>Live Load (Beban Hidup):</strong> Berat pekerja & alatan berdasarkan 'Tugas'.</div>
+          </div>
+          
+          <div class="info-box">
+            <div class="info-box-title">Gred Tugas (Duty Class) Standard NOSS:</div>
+            <ul style="font-size:0.9rem;">
+              <li><strong>Ringan (Light Duty):</strong> 225 kg per bay</li>
+              <li><strong>Sederhana (Medium Duty):</strong> 450 kg per bay</li>
+              <li><strong>Berat (Heavy Duty):</strong> 675 kg per bay</li>
+            </ul>
+          </div>
+        `,
+        en: `
+          <h3>Safe Working Load (SWL) Concept</h3>
+          <div class="checklist-box">
+            <div class="checklist-item"><strong>Dead Load:</strong> Static components weight.</div>
+            <div class="checklist-item"><strong>Live Load:</strong> Weight of workers & tools based on 'Duty'.</div>
+          </div>
+          
+          <div class="info-box">
+            <div class="info-box-title">NOSS Standard Duty Class:</div>
+            <ul style="font-size:0.9rem;">
+              <li><strong>Light Duty:</strong> 225 kg per bay</li>
+              <li><strong>Medium Duty:</strong> 450 kg per bay</li>
+              <li><strong>Heavy Duty:</strong> 675 kg per bay</li>
+            </ul>
+          </div>
+        `
+      },
+      quiz: [
+        { 
+          q: { ms: "Dalam pembinaan perancah 'Tugas Berat' (Heavy Duty), berapakah beban hidup maksimum dibenarkan untuk 1 bay?", en: "In 'Heavy Duty' scaffold construction, what is the maximum live load allowed for 1 bay?" }, 
+          options: { ms: ["225 kg", "450 kg", "635 kg", "675 kg"], en: ["225 kg", "450 kg", "635 kg", "675 kg"] }, answer: 3, 
+          explanation: { ms: "Tugas Berat (Heavy Duty) di Malaysia dinilai pada paras 675 kg setiap ruang/bay.", en: "Heavy Duty in Malaysia is rated at 675 kg per space/bay." } 
+        },
+        { 
+          q: { ms: "Pekerja, alatan tangan mesin canai (grinder), dan tong cat yang diletakkan di atas perancah dikategorikan sebagai beban apa?", en: "Workers, hand grinder tools, and paint buckets placed on the scaffold are categorized as what load?" }, 
+          options: { ms: ["Dead Load (Beban Mati)", "Environmental Load (Beban Alam)", "Live Load (Beban Hidup)", "Static Load (Beban Statik)"], en: ["Dead Load", "Environmental Load", "Live Load", "Static Load"] }, answer: 2, 
+          explanation: { ms: "Semua benda yang boleh dialih, bergerak dan tidak kekal adalah Live Load (Beban Hidup).", en: "All things that can be moved, mobile and not permanent are Live Loads." } 
+        },
+        { 
+          q: { ms: "Sebuah perancah mempunyai berat paip besi dan komponen 1,000kg. Pekerja & bahan yang dinaikkan seberat 450kg. Berapakah 'Dead Load' (Beban Mati) sistem tersebut?", en: "A scaffold has iron pipes and components weighing 1,000kg. Workers & materials raised weigh 450kg. What is the 'Dead Load' of the system?" }, 
+          options: { ms: ["450 kg", "1,000 kg", "1,450 kg", "2,000 kg"], en: ["450 kg", "1,000 kg", "1,450 kg", "2,000 kg"] }, answer: 1, 
+          explanation: { ms: "Dead Load hanya merujuk kepada berat struktur besi (1,000kg) sahaja.", en: "Dead Load only refers to the weight of the iron structure (1,000kg)." } 
+        },
+        { 
+          q: { ms: "Beban kerja untuk mengecat atau pencucian bangunan (cleaning) dikategorikan di bawah gred beban apa?", en: "Work load for building painting or cleaning is categorized under what load grade?" }, 
+          options: { ms: ["Tugas Berat (Heavy Duty)", "Tugas Sederhana (Medium Duty)", "Tugas Ringan (Light Duty)", "Tugas Alam (Environment Duty)"], en: ["Heavy Duty", "Medium Duty", "Light Duty", "Environment Duty"] }, answer: 2, 
+          explanation: { ms: "Kerja yang tidak memerlukan simpanan bahan binaan yang berat diletakkan di atas lantai merupakan Tugas Ringan (225kg/bay).", en: "Work that does not require heavy building materials stored on the floor is Light Duty (225kg/bay)." } 
+        }
+      ]
+    },
+    {
+      id: 'm1-5',
+      title: { ms: 'Modul 5: Tali, Takal (Gin Wheel) & Ikatan', en: 'Module 5: Ropes, Gin Wheel & Knots' },
+      content: {
+        ms: `
+          <h3>Tali Fiber vs Sintetik</h3>
+          <div class="formula-box">SWL (kg) = Diameter (mm) &times; Diameter (mm)</div>
+          <div class="calc-example">
+            Contoh: Tali saiz 15mm.<br>
+            SWL = 15 &times; 15<br>
+            <strong style="color:var(--accent); font-size:1.2rem;">SWL = 225 kg</strong>
+          </div>
+
+          <h3>Jenis Simpulan & Ikatan Perancah (Knots)</h3>
+          <div class="svg-diagram-box">
+            <svg viewBox="0 0 200 120">
+              <rect x="40" y="20" width="20" height="80" fill="#FF6B00" />
+              <path d="M20 50 Q50 30 80 50 T50 70 Q20 50 40 20" fill="none" stroke="#f1c40f" stroke-width="4" />
+              <text x="50" y="115" fill="#ccc" font-size="10" text-anchor="middle">Timber Hitch (Tarik Paip)</text>
+              <rect x="140" y="20" width="20" height="80" fill="#00E676" />
+              <path d="M120 40 L180 60 M120 60 L180 40" fill="none" stroke="#f1c40f" stroke-width="4" />
+              <text x="150" y="115" fill="#ccc" font-size="10" text-anchor="middle">Clove Hitch</text>
+            </svg>
+            <div class="caption">Rajah 3.0: Contoh Ikatan Tali (Hand Hauling)</div>
+          </div>
+        `,
+        en: `
+          <h3>Fiber vs Synthetic Ropes</h3>
+          <div class="formula-box">SWL (kg) = Diameter (mm) &times; Diameter (mm)</div>
+          <div class="calc-example">
+            Example: 15mm rope.<br>
+            SWL = 15 &times; 15<br>
+            <strong style="color:var(--accent); font-size:1.2rem;">SWL = 225 kg</strong>
+          </div>
+
+          <h3>Scaffold Knots & Hitches</h3>
+          <div class="svg-diagram-box">
+            <svg viewBox="0 0 200 120">
+              <rect x="40" y="20" width="20" height="80" fill="#FF6B00" />
+              <path d="M20 50 Q50 30 80 50 T50 70 Q20 50 40 20" fill="none" stroke="#f1c40f" stroke-width="4" />
+              <text x="50" y="115" fill="#ccc" font-size="10" text-anchor="middle">Timber Hitch (Pull Pipe)</text>
+              <rect x="140" y="20" width="20" height="80" fill="#00E676" />
+              <path d="M120 40 L180 60 M120 60 L180 40" fill="none" stroke="#f1c40f" stroke-width="4" />
+              <text x="150" y="115" fill="#ccc" font-size="10" text-anchor="middle">Clove Hitch</text>
+            </svg>
+            <div class="caption">Diagram 3.0: Examples of Rope Knots (Hand Hauling)</div>
+          </div>
+        `
+      },
+      quiz: [
+        { 
+          q: { ms: "Berapakah anggaran Beban Kerja Selamat (SWL) bagi tali sintetik baharu yang berdiameter 16mm?", en: "What is the estimated Safe Working Load (SWL) for a new 16mm diameter synthetic rope?" }, 
+          options: { ms: ["160 kg", "256 kg", "312 kg", "400 kg"], en: ["160 kg", "256 kg", "312 kg", "400 kg"] }, answer: 1, 
+          explanation: { ms: "Berdasarkan formula DxD, 16mm x 16mm = 256 kg kemampun SWL tali tersebut.", en: "Based on the DxD formula, 16mm x 16mm = 256 kg SWL capacity for the rope." } 
+        },
+        { 
+          q: { ms: "Apakah jenis ikatan yang berfungsi sebagai 'Stopper' untuk menghalang tali daripada terlucut terus dari Takal (Gin Wheel)?", en: "What knot functions as a 'Stopper' to prevent the rope from completely unreeving from the Gin Wheel?" }, 
+          options: { ms: ["Reef Knot", "Timber Hitch", "Figure of Eight", "Single Bowline"], en: ["Reef Knot", "Timber Hitch", "Figure of Eight", "Single Bowline"] }, answer: 2, 
+          explanation: { ms: "Ikatan angka lapan (Figure of 8) tebal di hujung tali menjadikannya stopper sempurna.", en: "The thick Figure of 8 knot at the rope end makes it a perfect stopper." } 
+        },
+        { 
+          q: { ms: "Manakah antara berikut adalah KELEBIHAN utama tali Sintetik (Nylon) berbanding tali Fiber semulajadi (Manila)?", en: "Which of the following is the main ADVANTAGE of Synthetic (Nylon) rope compared to natural Fiber rope (Manila)?" }, 
+          options: { ms: ["Lebih kuat, kalis air dan tahan asid", "Tahan haba panas yang ekstrem melampaui 100°C", "Lebih murah harganya", "Menyerap air dengan cepat untuk tambah berat"], en: ["Stronger, waterproof and acid resistant", "Withstands extreme hot heat beyond 100°C", "It is cheaper in price", "Absorbs water quickly to add weight"] }, answer: 0, 
+          explanation: { ms: "Tali sintetik sangat kuat dan tahan bahan kimia/air, TAPI ia mempunyai kelemahan utama: ia cair/lebur jika terkena haba tinggi.", en: "Synthetic rope is very strong and chemical/water resistant, BUT it has a major flaw: it melts if exposed to high heat." } 
+        },
+        { 
+          q: { ms: "Apakah nama simpulan yang dikhususkan untuk menyambung DUA utas tali yang mempunyai SAIZ (diameter) yang SAMA?", en: "What is the name of the knot specifically meant for connecting TWO ropes of the SAME size (diameter)?" }, 
+          options: { ms: ["Bowline", "Timber Hitch", "Clove Hitch", "Reef Knot (Buku Sila)"], en: ["Bowline", "Timber Hitch", "Clove Hitch", "Reef Knot (Square Knot)"] }, answer: 3, 
+          explanation: { ms: "Reef knot atau simpul buku sila adalah cara termudah dan kukuh untuk menyambung 2 tali bersaiz sama.", en: "Reef knot or square knot is the easiest and solid way to connect 2 equal-sized ropes." } 
+        },
+        { 
+          q: { ms: "Ikatan 'Timber Hitch' yang biasanya digandingkan bersama 'Half-Hitch' sangat sesuai digunakan oleh scaffolder untuk mengangkat apa?", en: "The 'Timber Hitch' knot, usually coupled with a 'Half-Hitch', is very suitable for scaffolders to lift what?" }, 
+          options: { ms: ["Pekerja yang pengsan", "Baldi berisi cecair kimia", "Komponen paip (Tube) yang panjang", "Beg simen 50kg"], en: ["Fainted worker", "Bucket filled with chemical liquid", "Long pipe components (Tube)", "50kg cement bag"] }, answer: 2, 
+          explanation: { ms: "Timber hitch + half hitch mencengkam paip panjang dengan kemas supaya ia tidak tergelongsor apabila diangkat menegak.", en: "Timber hitch + half hitch grips long pipes neatly so they don't slide out when lifted vertically." } 
+        }
+      ]
+    },
+    {
+      id: 'm1-6',
+      title: { ms: 'Modul 6: Bekerja di Ketinggian & Akses', en: 'Module 6: Working at Height & Access' },
+      content: {
+        ms: `
+          <h3>Akses Tangga (Ladders)</h3>
+          <p>Tangga mesti dipanjangkan/dinaikkan sekurang-kurangnya <strong>1 meter (atau 1.05m)</strong> dari pelantar pendaratan (landing platform) untuk dijadikan tempat berpaut.</p>
+          <div class="checklist-box">
+            <div class="checklist-item"><strong>Sudut Kecondongan Tangga:</strong> Nisbah terbaik ialah 1 mendatar : 4 menegak (Lebih kurang 75 Darjah).</div>
+            <div class="checklist-item"><strong>Tindihan Tangga Bersambung (Overlap):</strong><br>- Kurang 4.8m: Tindih 2 rungs (anak tangga)<br>- 4.8m hingga 6.0m: Tindih 3 rungs<br>- Lebih 6.0m: Tindih 4 rungs</div>
+          </div>
+
+          <h3>Susur Pelindung (Guardrail)</h3>
+          <div class="svg-diagram-box">
+            <svg viewBox="0 0 300 150">
+              <rect x="20" y="130" width="260" height="10" fill="#888" />
+              <rect x="40" y="20" width="10" height="120" fill="#FF6B00" />
+              <rect x="250" y="20" width="10" height="120" fill="#FF6B00" />
+              <!-- Top rail -->
+              <rect x="20" y="40" width="260" height="8" fill="#00E676" />
+              <text x="150" y="35" fill="#00E676" font-size="10" text-anchor="middle">Top Rail (0.9m - 1.1m)</text>
+              <!-- Mid rail -->
+              <rect x="20" y="80" width="260" height="8" fill="#00E676" />
+              <text x="150" y="75" fill="#00E676" font-size="10" text-anchor="middle">Mid Rail</text>
+              <!-- Toeboard -->
+              <rect x="40" y="110" width="210" height="20" fill="#f1c40f" />
+              <text x="150" y="125" fill="#000" font-size="10" font-weight="bold" text-anchor="middle">Toeboard (150mm Min)</text>
+            </svg>
+            <div class="caption">Rajah 4.0: Komponen Pagar Penghadang</div>
+          </div>
+          <p><em>*Nota: Ketinggian minimum papan pacak (Toeboard) mengikut standard dalam modul ialah <strong>150mm</strong> bagi menghalang sepana dari jatuh.</em></p>
+        `,
+        en: `
+          <h3>Ladder Access</h3>
+          <p>Ladders must be extended at least <strong>1 meter (or 1.05m)</strong> above the landing platform to serve as a handhold.</p>
+          <div class="checklist-box">
+            <div class="checklist-item"><strong>Ladder Angle:</strong> The best ratio is 1 horizontal : 4 vertical (Approximately 75 Degrees).</div>
+            <div class="checklist-item"><strong>Extension Ladder Overlap:</strong><br>- Under 4.8m: Overlap 2 rungs<br>- 4.8m to 6.0m: Overlap 3 rungs<br>- Over 6.0m: Overlap 4 rungs</div>
+          </div>
+
+          <h3>Guardrails</h3>
+          <div class="svg-diagram-box">
+            <svg viewBox="0 0 300 150">
+              <rect x="20" y="130" width="260" height="10" fill="#888" />
+              <rect x="40" y="20" width="10" height="120" fill="#FF6B00" />
+              <rect x="250" y="20" width="10" height="120" fill="#FF6B00" />
+              <rect x="20" y="40" width="260" height="8" fill="#00E676" />
+              <text x="150" y="35" fill="#00E676" font-size="10" text-anchor="middle">Top Rail (0.9m - 1.1m)</text>
+              <rect x="20" y="80" width="260" height="8" fill="#00E676" />
+              <text x="150" y="75" fill="#00E676" font-size="10" text-anchor="middle">Mid Rail</text>
+              <rect x="40" y="110" width="210" height="20" fill="#f1c40f" />
+              <text x="150" y="125" fill="#000" font-size="10" font-weight="bold" text-anchor="middle">Toeboard (150mm Min)</text>
+            </svg>
+            <div class="caption">Diagram 4.0: Guardrail Components</div>
+          </div>
+          <p><em>*Note: The minimum height of the Toeboard according to module standards is <strong>150mm</strong> to prevent spanners from falling.</em></p>
+        `
+      },
+      quiz: [
+        { 
+          q: { ms: "Berapakah sudut maksima kecondongan yang paling selamat untuk pemasangan tangga perancah?", en: "What is the maximum safest inclination angle to place a scaffold ladder?" }, 
+          options: { ms: ["45°", "55°", "75°", "90°"], en: ["45°", "55°", "75°", "90°"] }, answer: 2, 
+          explanation: { ms: "Nisbah sudut selamat adalah 1 jarak mendatar : 4 jarak menegak. Bersamaan sudut 75 darjah.", en: "The safe angle ratio is 1 horizontal unit : 4 vertical units. Equivalents to an angle of 75 degrees." } 
+        },
+        { 
+          q: { ms: "Sekiranya anda mencantum dua batang tangga untuk mencapai ketinggian 5.0 meter, berapakah bilangan 'rungs' (anak tangga) yang mesti bertindih (overlap)?", en: "If you connect two ladders to reach a height of 5.0 meters, how many 'rungs' must overlap?" }, 
+          options: { ms: ["1 Rung", "2 Rungs", "3 Rungs", "4 Rungs"], en: ["1 Rung", "2 Rungs", "3 Rungs", "4 Rungs"] }, answer: 2, 
+          explanation: { ms: "Syarat panjang tangga sambungan: Bawah 4.8m (2 rungs), 4.8m-6m (3 rungs), Lebih 6m (4 rungs).", en: "Extension ladder rules: Under 4.8m (2 rungs), 4.8m-6m (3 rungs), Over 6m (4 rungs)." } 
+        },
+        { 
+          q: { ms: "Berapa meter kah tangga akses MESTI dinaikkan melebihi lantai pelantar mendarat (landing platform)?", en: "How many meters MUST the access ladder be extended above the landing platform floor?" }, 
+          options: { ms: ["0.5 meter", "1.05 meter", "1.5 meter", "2.0 meter"], en: ["0.5 meters", "1.05 meters", "1.5 meters", "2.0 meters"] }, answer: 1, 
+          explanation: { ms: "Lebihan ini adalah penting untuk dijadikan tempat berpaut tangan yang selamat ketika pekerja melangkah keluar dari tangga ke lantai.", en: "This extension is crucial to serve as a safe handhold when workers step off the ladder onto the floor." } 
+        },
+        { 
+          q: { ms: "Berapakah saiz ukuran tinggi MINIMUM bagi Papan Pacak (Toeboard) yang dipasang pada perancah?", en: "What is the MINIMUM height measurement for a Toeboard installed on a scaffold?" }, 
+          options: { ms: ["100 mm", "150 mm", "300 mm", "500 mm"], en: ["100 mm", "150 mm", "300 mm", "500 mm"] }, answer: 1, 
+          explanation: { ms: "Saiz minimum toeboard (papan pacak di sisi platform) ialah 150mm tinggi dari permukaan lantai bagi menahan serpihan/alatan jatuh.", en: "The minimum size for a toeboard is 150mm high from the floor surface to prevent debris/tools from falling." } 
+        }
+      ]
+    },
+    {
+      id: 'm1-7',
+      title: { ms: 'Modul 7: Kestabilan, Ikatan (Ties) & Bracing', en: 'Module 7: Stability, Ties & Bracing' },
+      content: {
+        ms: `
+          <h3>Ikatan (Ties) pada Dinding Bangunan</h3>
+          <p>Jika tinggi perancah melebihi <strong>3 kali lebar dasar terkecilnya</strong>, ia WAJIB diikat ke struktur tetap (Ties).</p>
+          <div class="info-box">
+            <div class="info-box-title">Jenis-Jenis Ikatan Dinding:</div>
+            <ul>
+              <li><strong>Through Tie:</strong> Batang paip merentasi tingkap bukaan bangunan.</li>
+              <li><strong>Reveal Tie:</strong> Diikat ketat di celah bukaan dinding (guna friction). Tiub yang melintang permukaan tingkap menggunakan Reveal Pin.</li>
+              <li><strong>Box Tie / Column Tie:</strong> Paip diikat memeluk keliling tiang konkrit.</li>
+              <li><strong>Two-Way Tie:</strong> Ikatan dwi-hala pada sudut struktur.</li>
+            </ul>
+          </div>
+          
+          <div class="svg-diagram-box">
+            <svg viewBox="0 0 300 150">
+              <rect x="120" y="20" width="60" height="110" fill="#555" />
+              <rect x="100" y="40" width="100" height="10" fill="#00E676" />
+              <rect x="100" y="100" width="100" height="10" fill="#00E676" />
+              <rect x="110" y="30" width="10" height="90" fill="#FF6B00" />
+              <rect x="180" y="30" width="10" height="90" fill="#FF6B00" />
+              <text x="150" y="145" fill="#ccc" font-size="10" text-anchor="middle">Box Tie / Column Tie</text>
+            </svg>
+            <div class="caption">Rajah 5.0: Konsep Ikatan Memeluk (Box Tie) pada Tiang</div>
+          </div>
+
+          <h3>Jenis Bracing (Rembat)</h3>
+          <ul>
+            <li><strong>Facade Bracing (Sway Bracing):</strong> Paip pepenjuru di permukaan luar muka perancah untuk kekukuhan membujur.</li>
+            <li><strong>Ledger Bracing (Cross Bracing):</strong> Paip menegak bersilang dari standard ke standard di dalam kotak perancah untuk kekuatan sisi.</li>
+            <li><strong>Plan Bracing:</strong> Paip melintang mendatar (sudut ke sudut) di udara untuk mengekalkan bentuk 'square' (kotak) perancah.</li>
+          </ul>
+        `,
+        en: `
+          <h3>Wall Ties</h3>
+          <p>If the scaffold height exceeds <strong>3 times its shortest base width</strong>, it MUST be tied to a fixed structure (Ties).</p>
+          <div class="info-box">
+            <div class="info-box-title">Types of Wall Ties:</div>
+            <ul>
+              <li><strong>Through Tie:</strong> Pipe traversing through an open building window.</li>
+              <li><strong>Reveal Tie:</strong> Wedged tightly inside a wall recess (using friction and Reveal Pin).</li>
+              <li><strong>Box Tie / Column Tie:</strong> Pipes hugging entirely around a concrete column.</li>
+              <li><strong>Two-Way Tie:</strong> Dual-direction tie at a structural corner.</li>
+            </ul>
+          </div>
+          
+          <div class="svg-diagram-box">
+            <svg viewBox="0 0 300 150">
+              <rect x="120" y="20" width="60" height="110" fill="#555" />
+              <rect x="100" y="40" width="100" height="10" fill="#00E676" />
+              <rect x="100" y="100" width="100" height="10" fill="#00E676" />
+              <rect x="110" y="30" width="10" height="90" fill="#FF6B00" />
+              <rect x="180" y="30" width="10" height="90" fill="#FF6B00" />
+              <text x="150" y="145" fill="#ccc" font-size="10" text-anchor="middle">Box Tie / Column Tie</text>
+            </svg>
+            <div class="caption">Diagram 5.0: Box Tie Concept around a Pillar</div>
+          </div>
+
+          <h3>Types of Bracing</h3>
+          <ul>
+            <li><strong>Facade Bracing (Sway Bracing):</strong> Diagonal pipe on the outer face of the scaffold for longitudinal rigidity.</li>
+            <li><strong>Ledger Bracing (Cross Bracing):</strong> Crossed diagonal pipes from standard to standard inside the scaffold box for lateral strength.</li>
+            <li><strong>Plan Bracing:</strong> Horizontal diagonal pipe (corner to corner) in the air to maintain the scaffold's 'square' shape.</li>
+          </ul>
+        `
+      },
+      quiz: [
+        { 
+          q: { ms: "Perancah anda mempunyai tapak selebar 2 meter. Pada ketinggian berapakah ia dianggap TIDAK STABIL dan diwajibkan mula dipasang ikat 'Ties' ke bangunan?", en: "Your scaffold has a base width of 2 meters. At what height is it considered UNSTABLE and mandatory to start installing 'Ties' to the building?" }, 
+          options: { ms: ["4 Meter", "6 Meter", "8 Meter", "10 Meter"], en: ["4 Meters", "6 Meters", "8 Meters", "10 Meters"] }, answer: 1, 
+          explanation: { ms: "Peraturan ketat DOSH: Ketinggian perancah tidak boleh melebihi 3 x (lebar tapak). 3 darab 2m = 6 meter.", en: "DOSH strict rule: Scaffold height cannot exceed 3 x (base width). 3 times 2m = 6 meters." } 
+        },
+        { 
+          q: { ms: "Sekiranya melakukan penyambungan paip bracing (rembat) menggunakan 2 batang tiub, berapakah minimum jarak pertindihan (overlap) penyambungan tersebut?", en: "If joining bracing pipes using 2 tubes, what is the minimum overlap distance for the connection?" }, 
+          options: { ms: ["150 mm", "300 mm", "450 mm", "600 mm"], en: ["150 mm", "300 mm", "450 mm", "600 mm"] }, answer: 1, 
+          explanation: { ms: "Penyambungan antara dua paip serong secara bertindih di atas paksi memerlukan overlap sekurang-kurangnya 300mm bagi kestabilan clamp.", en: "Overlapping connections between two diagonal pipes require at least 300mm overlap for clamp stability." } 
+        },
+        { 
+          q: { ms: "Apabila membuat ikatan 'Reveal Tie' pada tingkap, apakah nama komponen yang perlu digunakan di hujung tiub yang melintangi permukaan ruang tingkap tersebut?", en: "When making a 'Reveal Tie' on a window, what is the component used at the end of the tube that crosses the window space?" }, 
+          options: { ms: ["Base plate", "Right Angle Coupler", "Reveal Pin", "Beam Clamp"], en: ["Base plate", "Right Angle Coupler", "Reveal Pin", "Beam Clamp"] }, answer: 2, 
+          explanation: { ms: "Reveal pin diputar sehingga menekan padat pada permukaan konkrit dinding melalui geseran (friction).", en: "A Reveal pin is screwed until it presses firmly against the concrete wall surface via friction." } 
+        },
+        { 
+          q: { ms: "Apakah jenis bracing yang dipasang secara serong di muka hadapan luaran perancah untuk mencegahnya daripada bergoyang membujur?", en: "What type of bracing is installed diagonally on the outer front face of the scaffold to prevent it from swaying longitudinally?" }, 
+          options: { ms: ["Plan Bracing", "Ledger Bracing", "Facade Bracing (Sway Bracing)", "Knee Bracing"], en: ["Plan Bracing", "Ledger Bracing", "Facade Bracing (Sway Bracing)", "Knee Bracing"] }, answer: 2, 
+          explanation: { ms: "Facade bracing (juga dipanggil sway bracing) adalah tiub serong di muka luar perancah yang memberi kestabilan membujur penuh.", en: "Facade bracing (also called sway bracing) is the diagonal tube on the scaffold's outer face that gives full longitudinal stability." } 
+        },
+        { 
+          q: { ms: "Apakah jenis paip serong yang dipasang di bahagian dalam struktur dari satu batang 'Standard' melintang ke 'Standard' di seberangnya?", en: "What type of diagonal pipe is installed inside the structure crossing from one 'Standard' pole to the 'Standard' across from it?" }, 
+          options: { ms: ["Ledger Bracing (Cross Bracing)", "Plan Bracing", "Facade Bracing", "Guardrail"], en: ["Ledger Bracing (Cross Bracing)", "Plan Bracing", "Facade Bracing", "Guardrail"] }, answer: 0, 
+          explanation: { ms: "Ledger bracing membentuk palang X / silang di dalam untuk mencegah struktur dari penyek (berubah bentuk silang).", en: "Ledger bracing forms an internal X / cross to prevent the structure from squashing (changing cross shape)." } 
+        }
+      ]
+    },
+    {
+      id: 'm1-8',
+      title: { ms: 'Modul 8: Scafftag, Jaring & Hazad Elektrik', en: 'Module 8: Scafftag, Nets & Electrical Hazards' },
+      content: {
+        ms: `
+          <h3>Kitaran Pemeriksaan DOSH (Scafftag)</h3>
+          <div style="display:flex; gap:10px; margin-bottom:1rem;">
+            <div style="background:#00E676; width:20px; height:20px;"></div><span><strong>Hijau:</strong> Selamat digunakan.</span><br>
+            <div style="background:#FFEA00; width:20px; height:20px; margin-left:10px;"></div><span><strong>Kuning:</strong> Perancah sedang dalam pembinaan / pengubahsuaian (Awas).</span><br>
+            <div style="background:#FF3D00; width:20px; height:20px; margin-left:10px;"></div><span style="color:#fff;"><strong>Merah:</strong> BAHAYA! Tidak selamat dilarang naik.</span>
+          </div>
+          <p>Tag hijau sah maksimum <strong>7 Hari</strong> sahaja. Selesai tempoh, Inspektor Bertauliah wajib semak dan sain semula kad baharu.</p>
+          
+          <h3>Jaring Keselamatan (Safety Nets)</h3>
+          <ul>
+            <li><strong>Jaring tangkap Manusia:</strong> Saiz mata jaring (mesh) mestilah sekurang-kurangnya 100mm &times; 100mm.</li>
+            <li><strong>Jaring tangkap Barang (Debris net):</strong> Saiz mata jaring mestilah kecil (kurang dari 10mm &times; 10mm) agar serpihan tidak lolos ke bawah.</li>
+          </ul>
+
+          <h3>Hazad Talian Elektrik (Clearance)</h3>
+          <p>Jarak kelegaan (clearance) wajib jika perancah dibina berhampiran wayar elektrik kabel hidup:</p>
+          <ul>
+            <li>Menggunakan tiub perancah <strong>Besi (Metal)</strong> = Kelegaan minimum <strong>4.0 meter</strong>.</li>
+            <li>Menggunakan perancah <strong>Kayu/Buluh</strong> = Kelegaan minimum <strong>1.5 meter</strong>.</li>
+          </ul>
+        `,
+        en: `
+          <h3>DOSH Inspection Cycle (Scafftag)</h3>
+          <div style="display:flex; gap:10px; margin-bottom:1rem;">
+            <div style="background:#00E676; width:20px; height:20px;"></div><span><strong>Green:</strong> Safe to use.</span><br>
+            <div style="background:#FFEA00; width:20px; height:20px; margin-left:10px;"></div><span><strong>Yellow:</strong> Scaffold is under construction / modification (Caution).</span><br>
+            <div style="background:#FF3D00; width:20px; height:20px; margin-left:10px;"></div><span style="color:#fff;"><strong>Red:</strong> DANGER! Unsafe, forbidden to climb.</span>
+          </div>
+          <p>Green tags are valid for a maximum of <strong>7 Days</strong> only. After expiration, a Certified Inspector must check and sign a new card.</p>
+          
+          <h3>Safety Nets</h3>
+          <ul>
+            <li><strong>Human catch net (Fall arrest):</strong> Mesh size must be at least 100mm &times; 100mm.</li>
+            <li><strong>Debris net:</strong> Mesh size must be small (less than 10mm &times; 10mm) so debris doesn't slip through.</li>
+          </ul>
+
+          <h3>Electrical Line Hazards (Clearance)</h3>
+          <p>Mandatory clearance distance if scaffold is built near live electrical wires:</p>
+          <ul>
+            <li>Using <strong>Metal</strong> scaffold tubes = Minimum clearance of <strong>4.0 meters</strong>.</li>
+            <li>Using <strong>Timber/Bamboo</strong> scaffolds = Minimum clearance of <strong>1.5 meters</strong>.</li>
+          </ul>
+        `
+      },
+      quiz: [
+        { 
+          q: { ms: "Perancah BESI sedang didirikan berhampiran talian elektrik yang masih hidup. Apakah jarak minimum selamat yang wajib dipatuhi?", en: "A METAL scaffold is being erected near live electrical lines. What is the mandatory minimum safe distance to be maintained?" }, 
+          options: { ms: ["1.0 meter", "1.5 meter", "4.0 meter", "10.0 meter"], en: ["1.0 meters", "1.5 meters", "4.0 meters", "10.0 meters"] }, answer: 2, 
+          explanation: { ms: "Paip besi adalah konduktor terbaik. OSHA tetapkan jarak selamat wayar elektrik dari besi adalah minimum 4.0 meter.", en: "Iron pipes are excellent conductors. OSHA dictates a safe distance from electrical wires to metal is minimum 4.0 meters." } 
+        },
+        { 
+          q: { ms: "Berapakah saiz mata jaring (mesh size) yang sepatutnya digunakan khusus untuk menangkap MANUSIA (pekerja jatuh), bukan habuk barang?", en: "What mesh size should be used specifically to catch HUMANS (falling workers), not debris dust?" }, 
+          options: { ms: ["Kurang dari 10mm x 10mm", "Tepat 50mm x 50mm", "100mm x 100mm dan lebih", "Tiada piawaian ditetapkan"], en: ["Less than 10mm x 10mm", "Exactly 50mm x 50mm", "100mm x 100mm and above", "No standard set"] }, answer: 2, 
+          explanation: { ms: "Jaring tangkap orang lebih besar (100x100mm) untuk kelenturan, 10x10mm terlalu rapat dan khas untuk habuk serpihan (debris).", en: "Human catch nets are larger (100x100mm) for flexibility, 10x10mm is too tight and specifically for debris dust." } 
+        },
+        { 
+          q: { ms: "Di bawah undang-undang JKKP/DOSH, siapakah SATU-SATUNYA individu yang mempunyai kuasa dan autoriti untuk menandatangani dan meluluskan Kad Scafftag Hijau di tapak bina?", en: "Under DOSH/JKKP laws, who is the ONLY individual with the power and authority to sign and approve a Green Scafftag Card on site?" }, 
+          options: { ms: ["Pengurus Projek (Project Manager)", "Ketua Pekerja (Foreman)", "Orang Yang Kompeten (Scaffold Inspector)", "Pemandu Kren"], en: ["Project Manager", "Foreman", "Competent Person (Scaffold Inspector)", "Crane Driver"] }, answer: 2, 
+          explanation: { ms: "Hanya 'Orang Yang Kompeten' (Scaffold Inspector) yang berdaftar dengan DOSH dibenarkan untuk mengesahkan integriti struktur perancah.", en: "Only a 'Competent Person' (Scaffold Inspector) registered with DOSH is allowed to verify the scaffold structure's integrity." } 
+        },
+        { 
+          q: { ms: "Perancah anda telah diluluskan dengan Scafftag Hijau semalam. Namun pagi ini hujan ribut dan banjir berlaku merendam kawasan tapak base plate. Apakah tindakan yang WAJIB dilakukan sebelum mula bekerja?", en: "Your scaffold was approved with a Green Scafftag yesterday. However, this morning a thunderstorm and flood submerged the base plate area. What action is MANDATORY before starting work?" }, 
+          options: { ms: ["Terus bekerja memandangkan tag Hijau belum cukup 7 hari", "Ketuk sikit tiang besi tengok kuat ke tidak", "Tukar kepada tag Merah dan panggil Inspektor untuk membuat penilaian dan pemeriksaan semula segera", "Cuci lumpur dengan paip air sahaja"], en: ["Continue working since the Green tag isn't 7 days old yet", "Tap the iron poles lightly to see if they are strong", "Change to a Red tag and call the Inspector for an immediate re-evaluation and inspection", "Just wash the mud off with a water hose"] }, answer: 2, 
+          explanation: { ms: "Pemeriksaan serta-merta adalah wajib selepas cuaca ekstrem atau kejadian yang berisiko menjejaskan kestabilan struktur (seperti mendapan tanah selepas banjir).", en: "Immediate inspection is mandatory after extreme weather or events that risk affecting structural stability (like soil settlement after floods)." } 
+        },
+        { 
+          q: { ms: "Apakah warna Kad Scafftag yang membenarkan pekerja naik menggunakan perancah tersebut, TETAPI mempunyai sekatan keselamatan tertentu (contohnya hanya dibenarkan Tugas Ringan sahaja)?", en: "What is the color of the Scafftag Card that allows workers to climb using the scaffold, BUT has certain safety restrictions (e.g., only Light Duty allowed)?" }, 
+          options: { ms: ["Kad Hijau", "Kad Kuning", "Kad Merah", "Kad Biru"], en: ["Green Card", "Yellow Card", "Red Card", "Blue Card"] }, answer: 1, 
+          explanation: { ms: "Kuning (Caution / Awas) menandakan struktur selamat tetapi diubah suai atau mempunyai had bebanan kerja tertentu yang mesti dipatuhi.", en: "Yellow (Caution) indicates the structure is safe but modified or has a specific safe working load limit that must be adhered to." } 
+        }
+      ]
+    },
+    {
+      id: 'm1-9',
+      title: { ms: 'Modul 9: Teorem Pythagoras (Kiraan Bracing)', en: 'Module 9: Pythagoras Theorem (Bracing Calculation)' },
+      content: {
+        ms: `
+          <h3>Aplikasi Teorem Pythagoras dalam Perancah</h3>
+          <p>Bagi menentukan kepanjangan paip pepenjuru (Bracing), anda boleh mengira mengikut formula segi tiga bersudut tegak (Pythagoras):</p>
+          
+          <div class="formula-box">C = &radic;(A<sup>2</sup> + B<sup>2</sup>)</div>
+          <ul style="list-style:none; padding:0; margin-bottom:1.5rem; font-family:'JetBrains Mono', monospace; font-size:0.9rem; color:var(--text-dim);">
+            <li><strong>A</strong> = Jarak Menegak (Tinggi Lift)</li>
+            <li><strong>B</strong> = Jarak Mendatar (Panjang Bay)</li>
+            <li><strong>C</strong> = Panjang Paip Bracing (Pepenjuru)</li>
+          </ul>
+          
+          <h3>Contoh Pengiraan:</h3>
+          <div class="calc-example">
+            Katakan tinggi <em>Lift</em> (A) ialah 2 meter dan panjang <em>Bay</em> (B) ialah 2 meter.<br><br>
+            C = &radic;(2<sup>2</sup> + 2<sup>2</sup>)<br>
+            C = &radic;(4 + 4)<br>
+            C = &radic;8<br>
+            <strong style="color:var(--accent); font-size:1.3rem;">C = 2.82 meter</strong>
+          </div>
+          <p><em>*Nota Tapak: Jangan lupa tambah anggaran sekurang-kurangnya 0.3 meter (300mm) pada setiap hujung potongan paip untuk ikatan 'coupler'. Oleh itu paip 2.82m perlukan potongan paip lebih kurang 3.4m.</em></p>
+        `,
+        en: `
+          <h3>Application of Pythagoras Theorem in Scaffolding</h3>
+          <p>To determine the length of a diagonal pipe (Bracing), you can calculate using the right-angled triangle formula (Pythagoras):</p>
+          
+          <div class="formula-box">C = &radic;(A<sup>2</sup> + B<sup>2</sup>)</div>
+          <ul style="list-style:none; padding:0; margin-bottom:1.5rem; font-family:'JetBrains Mono', monospace; font-size:0.9rem; color:var(--text-dim);">
+            <li><strong>A</strong> = Vertical Distance (Lift Height)</li>
+            <li><strong>B</strong> = Horizontal Distance (Bay Length)</li>
+            <li><strong>C</strong> = Bracing Pipe Length (Diagonal)</li>
+          </ul>
+          
+          <h3>Calculation Example:</h3>
+          <div class="calc-example">
+            Suppose the <em>Lift</em> height (A) is 2 meters and the <em>Bay</em> length (B) is 2 meters.<br><br>
+            C = &radic;(2<sup>2</sup> + 2<sup>2</sup>)<br>
+            C = &radic;(4 + 4)<br>
+            C = &radic;8<br>
+            <strong style="color:var(--accent); font-size:1.3rem;">C = 2.82 meters</strong>
+          </div>
+          <p><em>*Site Note: Do not forget to add an estimated 0.3 meters (300mm) minimum at each pipe end for 'coupler' tying. Thus a 2.82m pipe needs a cut of roughly 3.4m.</em></p>
+        `
+      },
+      quiz: [
+        { 
+          q: { ms: "Apakah formula matematik yang digunapakai untuk mengira kepanjangan paip pepenjuru (Bracing)?", en: "What mathematical formula is applied to calculate the length of a diagonal pipe (Bracing)?" }, 
+          options: { ms: ["Teorem Pythagoras", "Hukum Hooke", "Formula Kuadratik", "Hukum Ohm"], en: ["Pythagoras Theorem", "Hooke's Law", "Quadratic Formula", "Ohm's Law"] }, answer: 0, 
+          explanation: { ms: "Teorem Pythagoras (A² + B² = C²) adalah asas geometri dalam mencari hipotenus (panjang pepenjuru) segi tiga tepat pada struktur.", en: "Pythagoras Theorem (A² + B² = C²) is the geometrical basis for finding the hypotenuse (diagonal length) of a right triangle on structures." } 
+        },
+        { 
+          q: { ms: "Dengan menggunakan Teorem Pythagoras, dapatkan panjang tepat paip 'bracing' tanpa mengambil kira lebihan ikatan jika tinggi lift adalah 1.8m dan panjang bay adalah 2.4m.", en: "Using Pythagoras' Theorem, find the exact length of the 'bracing' pipe without considering extra tie lengths if the lift height is 1.8m and the bay length is 2.4m." }, 
+          options: { ms: ["2.82 meter", "3.0 meter", "3.24 meter", "4.0 meter"], en: ["2.82 meters", "3.0 meters", "3.24 meters", "4.0 meters"] }, answer: 1, 
+          explanation: { ms: "Penyelesaian: C = √(1.8² + 2.4²) = √(3.24 + 5.76) = √9.0 = 3.0 meter.", en: "Solution: C = √(1.8² + 2.4²) = √(3.24 + 5.76) = √9.0 = 3.0 meters." } 
+        },
+        { 
+          q: { ms: "Berapakah panjang paip 'bracing' yang diperlukan untuk sebuah ruang (bay) bersaiz segi empat sama tegak berukuran tinggi 2.0 meter dan panjang mendatar 2.0 meter?", en: "What is the length of the 'bracing' pipe needed for a perfect square space (bay) measuring 2.0 meters high and 2.0 meters long horizontally?" }, 
+          options: { ms: ["2.82 meter", "3.0 meter", "3.49 meter", "4.0 meter"], en: ["2.82 meters", "3.0 meters", "3.49 meters", "4.0 meters"] }, answer: 0, 
+          explanation: { ms: "Penyelesaian: C = √(2.0² + 2.0²) = √(4.0 + 4.0) = √8.0 = 2.82 meter.", en: "Solution: C = √(2.0² + 2.0²) = √(4.0 + 4.0) = √8.0 = 2.82 meters." } 
+        }
+      ]
+    },
+    {
+      id: 'm1-10',
+      title: { ms: 'Modul 10: Tindakan Kecemasan & First Aid', en: 'Module 10: Emergency Response & First Aid' },
+      content: {
+        ms: `
+          <h3>Suspension Trauma (Trauma Tergantung)</h3>
+          <p>Apabila seorang pekerja jatuh dan **tergantung pada Safety Harness** dalam kedudukan tegak untuk tempoh yang lama, darah akan terkumpul di bahagian kaki (Venous Pooling). Jika dibiarkan melebihi 10 hingga 15 minit, mangsa boleh pengsan dan mengalami kerosakan organ (Maut).</p>
+          
+          <div class="info-box warning">
+            <div class="info-box-title">Tindakan Pantas:</div>
+            <ol>
+              <li>Sediakan tempat berpijak sementara kepada mangsa (contoh: *Trauma Relief Straps* atau juntaikan tali untuk mangsa jejak) bagi melegakan tekanan pada paha.</li>
+              <li>Jangan potong tali tiba-tiba jika tiada sokongan tangkapan di bawah.</li>
+              <li>Panggil Unit Penyelamat Tapak segera untuk operasi membawa turun.</li>
+            </ol>
+          </div>
+
+          <h3>Disyaki Patah Tulang Belakang (Spinal Injury)</h3>
+          <p>Bagi mangsa yang terhempas dari tempat tinggi, wujud risiko tinggi kepatahan tulang leher atau belakang.</p>
+          <ul>
+            <li><strong>JANGAN gerakkan mangsa:</strong> Jika anda bukan staf perubatan bertauliah, pergerakan kasar boleh memotong saraf tunjang (lumpuh seumur hidup).</li>
+            <li>Pastikan kawasan tersebut selamat dari sebarang objek jatuh lain, lalu segera hubungi kecemasan.</li>
+          </ul>
+        `,
+        en: `
+          <h3>Suspension Trauma</h3>
+          <p>When a worker falls and is **suspended in a Safety Harness** in an upright position for a long period, blood pools in the legs (Venous Pooling). If left for more than 10 to 15 minutes, the victim can faint and suffer organ damage (Fatal).</p>
+          
+          <div class="info-box warning">
+            <div class="info-box-title">Quick Actions:</div>
+            <ol>
+              <li>Provide a temporary foothold for the victim (e.g., *Trauma Relief Straps* or dangle a rope for the victim to step on) to relieve pressure on the thighs.</li>
+              <li>Do not suddenly cut the rope if there is no catch support below.</li>
+              <li>Call the Site Rescue Unit immediately for a takedown operation.</li>
+            </ol>
+          </div>
+
+          <h3>Suspected Spinal Injury</h3>
+          <p>For victims who have crashed from a height, there is a high risk of neck or back bone fractures.</p>
+          <ul>
+            <li><strong>DO NOT move the victim:</strong> If you are not certified medical staff, rough movements can sever the spinal cord (lifelong paralysis).</li>
+            <li>Ensure the area is safe from other falling objects, then immediately call emergency services.</li>
+          </ul>
+        `
+      },
+      quiz: [
+        { 
+          q: { ms: "Apakah risiko utama yang boleh membunuh jika seorang pekerja jatuh dan tergantung pada Safety Harness di udara melebihi 15 minit tanpa bergerak?", en: "What is the main fatal risk if a worker falls and is suspended in a Safety Harness mid-air for over 15 minutes without moving?" }, 
+          options: { ms: ["Kesesakan nafas", "Suspension Trauma (Darah terkumpul di kaki)", "Kecederaan lutut", "Patah tangan"], en: ["Shortness of breath", "Suspension Trauma (Blood pooling in legs)", "Knee injury", "Broken arm"] }, answer: 1, 
+          explanation: { ms: "Suspension trauma menyekat aliran darah pulang ke otak dan jantung, menyebabkan koma dan kegagalan organ fatal dengan pantas.", en: "Suspension trauma restricts blood flow back to the brain and heart, causing a coma and fatal organ failure rapidly." } 
+        },
+        { 
+          q: { ms: "Apakah tindakan PERTAMA yang paling tepat perlu dilakukan oleh anda jika seorang rakan sekerja jatuh terhempas ke bawah perancah dan disyaki patah tulang belakang (spinal cord)?", en: "What is the most accurate FIRST action you should take if a co-worker crashes down a scaffold and is suspected of a spinal cord fracture?" }, 
+          options: { ms: ["Angkat mangsa beramai-ramai masuk ke dalam kereta", "Beri mangsa minum air ais", "JANGAN gerakkan mangsa secara membuta tuli dan segera panggil bantuan pakar perubatan tapak", "Cabut helmet mangsa segera"], en: ["Lift the victim together into a car", "Give the victim ice water to drink", "DO NOT move the victim blindly and immediately call site medical experts", "Take off the victim's helmet immediately"] }, answer: 2, 
+          explanation: { ms: "Pergerakan mengejut pada tulang belakang yang retak boleh mengerat urat saraf utama lalu menyebabkan mangsa lumpuh kekal seumur hidup.", en: "Sudden movement on a cracked spine can sever the main nerves, causing the victim to be permanently paralyzed for life." } 
+        }
+      ]
+    },
+    {
+      id: 'm1-11',
+      title: { ms: 'Modul 11: Operasi Kren & Isyarat Tangan (Rigging)', en: 'Module 11: Crane Ops & Hand Signals (Rigging)' },
+      content: {
+        ms: `
+          <h3>Komunikasi Bersama Operator Kren</h3>
+          <p>Sebagai pemasang perancah, ada ketikanya anda perlu membimbing kren untuk menaikkan berkas paip atau peralatan berat. Penggunaan **Isyarat Tangan (Hand Signals)** antarabangsa yang betul sangat penting.</p>
+          
+          <div class="info-box">
+            <div class="info-box-title">Isyarat Asas:</div>
+            <ul>
+              <li><strong>Hoist Up (Angkat Naik):</strong> Tangan diangkat ke atas, jari telunjuk ditunjuk ke atas sambil membuat pusingan membulat perlahan.</li>
+              <li><strong>Lower (Turunkan Bawah):</strong> Lengan dijulurkan, jari telunjuk ditunjuk ke bawah sambil membuat pusingan membulat.</li>
+              <li><strong>Stop (Berhenti):</strong> Satu tangan didepangkan dengan tapak tangan terbuka (macam isyarat trafik berhenti).</li>
+              <li><strong>Emergency Stop (Berhenti Kecemasan):</strong> Kedua-dua lengan disilangkan secara mendatar dan digerak-gerakkan berulang kali di paras dada.</li>
+              <li><strong>Jib Up (Angkat Boom):</strong> Tangan digenggam (tumbuk) dengan ibu jari menghala tegak ke ATAS.</li>
+              <li><strong>Jib Down (Turunkan Boom):</strong> Tangan digenggam (tumbuk) dengan ibu jari menghala tegak ke BAWAH.</li>
+            </ul>
+          </div>
+          <p><em>*Awas: Hanya Rigger bertauliah atau seorang individu yang telah dilantik secara rasmi sahaja dibenarkan memberi isyarat kepada pengendali kren bagi mengelakkan kekeliruan arahan.</em></p>
+        `,
+        en: `
+          <h3>Communication with Crane Operators</h3>
+          <p>As a scaffolder, sometimes you need to guide a crane to lift tube bundles or heavy equipment. The use of proper international **Hand Signals** is crucial.</p>
+          
+          <div class="info-box">
+            <div class="info-box-title">Basic Signals:</div>
+            <ul>
+              <li><strong>Hoist Up:</strong> Forearm vertical, forefinger pointing up, move hand in small horizontal circle.</li>
+              <li><strong>Lower:</strong> Arm extended downward, forefinger pointing down, move hand in small horizontal circle.</li>
+              <li><strong>Stop:</strong> Arm extended, palm down, hold position rigidly.</li>
+              <li><strong>Emergency Stop:</strong> Both arms extended, palms down, move arms back and forth horizontally.</li>
+              <li><strong>Jib Up (Raise Boom):</strong> Arm extended, fingers closed, thumb pointing UP.</li>
+              <li><strong>Jib Down (Lower Boom):</strong> Arm extended, fingers closed, thumb pointing DOWN.</li>
+            </ul>
+          </div>
+          <p><em>*Caution: Only a certified Rigger or an officially designated person is allowed to give signals to the crane operator to avoid instruction confusion.</em></p>
+        `
+      },
+      quiz: [
+        { 
+          q: { ms: "Sekiranya anda nampak rigger menyilangkan kedua-dua belah tangannya berkali-kali di hadapan dada, apakah mesej isyarat tersebut kepada pemandu kren?", en: "If you see a rigger crossing both arms back and forth in front of their chest, what is the signal message to the crane driver?" }, 
+          options: { ms: ["Teruskan menaikkan barang dengan laju", "Berehat (Waktu makan)", "Berhenti Kecemasan (Emergency Stop)", "Gerakkan boom kren ke kiri"], en: ["Continue lifting goods quickly", "Rest (Meal time)", "Emergency Stop", "Move the crane boom to the left"] }, answer: 2, 
+          explanation: { ms: "Silangan dua lengan berturut-turut adalah isyarat universal meminta pengendali mesin berhenti SERTA MERTA kerana ada bahaya besar.", en: "Crossing two arms consecutively is a universal signal asking the machine operator to stop IMMEDIATELY due to major danger." } 
+        },
+        { 
+          q: { ms: "Bagaimanakah isyarat tangan yang betul untuk memberi arahan 'Hoist Up' (Angkat / Naikkan Tali)?", en: "What is the correct hand signal to give the command 'Hoist Up' (Lift/Raise the Line)?" }, 
+          options: { ms: ["Ibu jari tegak ke bawah", "Satu tangan didepangkan lurus", "Jari telunjuk ditunjuk ke atas sambil tangan membuat pusingan membulat", "Tepuk tangan dua kali"], en: ["Thumb pointing straight down", "One arm extended straight out", "Forefinger pointing up while hand makes a circling motion", "Clapping hands twice"] }, answer: 2, 
+          explanation: { ms: "Pusingan jari telunjuk ke atas melambangkan arahan putaran dram takal kren untuk menarik kabel menaikkan objek.", en: "Circling the forefinger upwards symbolizes the command for the crane's hoist drum rotation to pull the cable up to lift the object." } 
+        },
+        { 
+          q: { ms: "Anda sedang bekerja dan mendapati sebuah kren sedang mengangkat tiub perancah. Siapakah yang sepatutnya memberi isyarat tangan kepada operator kren?", en: "You are working and see a crane lifting scaffold tubes. Who is supposed to give hand signals to the crane operator?" }, 
+          options: { ms: ["Sesiapa sahaja yang nampak", "Hanya pekerja asing", "Hanya seorang rigger/pengisyarat yang dilantik secara rasmi", "Pemandu jentera backhoe yang berada berhampiran"], en: ["Anyone who sees", "Only foreign workers", "Only a formally appointed rigger/signaler", "A backhoe driver nearby"] }, answer: 2, 
+          explanation: { ms: "Arahan mesti dipusatkan (centralized) kepada seorang rigger sahaja. Jika ramai-ramai beri isyarat berlainan, kren boleh kemalangan.", en: "Instructions must be centralized to one rigger only. If many people give different signals, the crane could crash." } 
+        }
+      ]
+    },
+    {
+      id: 'm1-12',
+      title: { ms: 'Modul 12: Asas Tapak (Base & Sole Board)', en: 'Module 12: Foundation (Base & Sole Board)' },
+      content: {
+        ms: `
+          <h3>Spesifikasi Base Plate & Sole Board</h3>
+          <p>Tapak perancah adalah komponen paling kritikal untuk mengelakkan struktur dari mendap (sinking) apabila menanggung beban mati dan beban hidup.</p>
+          
+          <div class="info-box">
+            <div class="info-box-title">Spesifikasi Plat Tapak (Base Plate):</div>
+            <ul>
+              <li><strong>Ukuran Minimum:</strong> 150mm &times; 150mm persegi.</li>
+              <li><strong>Ketebalan Minimum:</strong> 6mm.</li>
+              <li><strong>Panjang Pin (Shank):</strong> Minimum 50mm untuk dimasukkan ke dalam paip Standard.</li>
+            </ul>
+          </div>
+
+          <div class="info-box warning">
+            <div class="info-box-title">Spesifikasi Papan Tapak (Sole Board):</div>
+            <p>Mesti digunakan jika perancah dibina di atas tanah lembut, berpasir, atau aspal.</p>
+            <ul>
+              <li><strong>Keluasan Minimum:</strong> 0.11m<sup>2</sup> (Contoh: 500mm panjang &times; 225mm lebar).</li>
+              <li><strong>Ketebalan Minimum:</strong> 38mm.</li>
+              <li>Jika tanah terlalu lembut, sole board perlu memanjang sekurang-kurangnya bersentuhan dengan DUA <em>Base plate</em> sekaligus.</li>
+            </ul>
+          </div>
+        `,
+        en: `
+          <h3>Base Plate & Sole Board Specifications</h3>
+          <p>The scaffold base is the most critical component to prevent the structure from sinking under dead and live loads.</p>
+          
+          <div class="info-box">
+            <div class="info-box-title">Base Plate Specifications:</div>
+            <ul>
+              <li><strong>Minimum Dimensions:</strong> 150mm &times; 150mm square.</li>
+              <li><strong>Minimum Thickness:</strong> 6mm.</li>
+              <li><strong>Shank Length:</strong> Minimum 50mm to be inserted into the Standard pipe.</li>
+            </ul>
+          </div>
+
+          <div class="info-box warning">
+            <div class="info-box-title">Sole Board Specifications:</div>
+            <p>Must be used if the scaffold is erected on soft ground, sand, or asphalt.</p>
+            <ul>
+              <li><strong>Minimum Area:</strong> 0.11m<sup>2</sup> (Example: 500mm length &times; 225mm width).</li>
+              <li><strong>Minimum Thickness:</strong> 38mm.</li>
+              <li>If the ground is very soft, the sole board should be long enough to support at least TWO <em>Base plates</em> simultaneously.</li>
+            </ul>
+          </div>
+        `
+      },
+      quiz: [
+        { 
+          q: { ms: "Berapakah ukuran minimum spesifikasi bagi sekeping Plat Tapak (Base Plate) keluli?", en: "What are the minimum specification dimensions for a steel Base Plate?" }, 
+          options: { ms: ["100mm x 100mm x 4mm", "150mm x 150mm x 6mm", "200mm x 200mm x 8mm", "225mm x 225mm x 6mm"], en: ["100mm x 100mm x 4mm", "150mm x 150mm x 6mm", "200mm x 200mm x 8mm", "225mm x 225mm x 6mm"] }, answer: 1, 
+          explanation: { ms: "Standard industri menetapkan Base Plate mesti mempunyai ukuran sekurang-kurangnya 150mm panjang/lebar dan tebal 6mm.", en: "Industry standard mandates a Base Plate must have dimensions of at least 150mm length/width and 6mm thickness." } 
+        },
+        { 
+          q: { ms: "Berapakah ukuran panjang minimum (length) yang dibenarkan bagi sekeping Sole Board (Papan Tapak)?", en: "What is the minimum allowed length dimension for a Sole Board?" }, 
+          options: { ms: ["300 mm", "400 mm", "500 mm", "1000 mm"], en: ["300 mm", "400 mm", "500 mm", "1000 mm"] }, answer: 2, 
+          explanation: { ms: "Untuk mendapatkan luas permukaan 0.11m², panjang minimum sole board mesti 500mm.", en: "To achieve a surface area of 0.11m², the minimum length of a sole board must be 500mm." } 
+        }
+      ]
+    },
+    {
+      id: 'm1-13',
+      title: { ms: 'Modul 13: Spesifikasi Takal (Gin Wheel)', en: 'Module 13: Gin Wheel Specifications' },
+      content: {
+        ms: `
+          <h3>Pemasangan & Penggunaan Takal (Gin Wheel)</h3>
+          <p>Gin Wheel (Takal) adalah alat penting untuk mengangkat material paip dan coupler di tapak. Ia mesti dipasang dengan betul bagi mengelakkan kemalangan beban jatuh.</p>
+
+          <div class="info-box">
+            <div class="info-box-title">Spesifikasi Teknikal Gin Wheel:</div>
+            <ul>
+              <li><strong>Jenis Pemegang:</strong> Takal jenis <strong>Ring (Cincin)</strong> adalah diwajibkan berbanding jenis Cangkuk (Hook). Cincin menghalang takal dari terlucut dari paip sokongan.</li>
+              <li><strong>Pemasangan:</strong> Takal mesti dimasukkan ke dalam paip cantilevers (mengunjur keluar) yang disokong dengan sekurang-kurangnya dua <em>right angle coupler</em>.</li>
+              <li><strong>Jarak Maksimum Unjuran:</strong> Paip sokongan takal <strong>TIDAK BOLEH mengunjur keluar lebih daripada 750 mm</strong> dari tiang <em>Standard</em> perancah. Jika lebih, risiko perancah terbalik (tipping) adalah tinggi.</li>
+              <li><strong>Had Beban Bekerja (SWL):</strong> Maksimum beban yang selamat ditarik oleh pekerja secara manual (hand hauling) ialah <strong>50 kg</strong>.</li>
+            </ul>
+          </div>
+          
+          <div class="svg-diagram-box">
+            <svg viewBox="0 0 300 150">
+              <line x1="50" y1="20" x2="50" y2="140" stroke="#FF6B00" stroke-width="6"/>
+              <line x1="40" y1="40" x2="180" y2="40" stroke="#00E676" stroke-width="5"/>
+              <!-- Gin Wheel Box -->
+              <circle cx="160" cy="55" r="10" fill="none" stroke="#ccc" stroke-width="3"/>
+              <circle cx="160" cy="75" r="15" fill="#3498db" />
+              <line x1="160" y1="40" x2="160" y2="45" stroke="#ccc" stroke-width="4"/>
+              <line x1="145" y1="75" x2="145" y2="130" stroke="#f1c40f" stroke-width="2"/>
+              <line x1="175" y1="75" x2="175" y2="130" stroke="#f1c40f" stroke-width="2"/>
+              <!-- Measurement line -->
+              <line x1="50" y1="15" x2="160" y2="15" stroke="#fff" stroke-dasharray="2,2"/>
+              <text x="105" y="10" fill="#fff" font-size="10" text-anchor="middle">Maksimum 750mm</text>
+            </svg>
+            <div class="caption">Rajah 6.0: Pemasangan Gin Wheel (Unjuran Maksimum)</div>
+          </div>
+        `,
+        en: `
+          <h3>Gin Wheel Erection & Usage</h3>
+          <p>The Gin Wheel is a vital tool for lifting pipe and coupler materials on site. It must be installed correctly to prevent dropped load accidents.</p>
+
+          <div class="info-box">
+            <div class="info-box-title">Gin Wheel Technical Specifications:</div>
+            <ul>
+              <li><strong>Mount Type:</strong> <strong>Ring type</strong> Gin Wheels are mandatory compared to Hook types. The ring prevents the wheel from slipping off the support pipe.</li>
+              <li><strong>Installation:</strong> The wheel must be slipped over a cantilever pipe supported by at least two <em>right angle couplers</em>.</li>
+              <li><strong>Maximum Cantilever Distance:</strong> The support pipe <strong>MUST NOT extend outward more than 750 mm</strong> from the scaffold <em>Standard</em>. If it exceeds this, the risk of scaffolding tipping over is high.</li>
+              <li><strong>Safe Working Load (SWL):</strong> The maximum safe load to be pulled manually by a worker (hand hauling) is <strong>50 kg</strong>.</li>
+            </ul>
+          </div>
+          
+          <div class="svg-diagram-box">
+            <svg viewBox="0 0 300 150">
+              <line x1="50" y1="20" x2="50" y2="140" stroke="#FF6B00" stroke-width="6"/>
+              <line x1="40" y1="40" x2="180" y2="40" stroke="#00E676" stroke-width="5"/>
+              <!-- Gin Wheel Box -->
+              <circle cx="160" cy="55" r="10" fill="none" stroke="#ccc" stroke-width="3"/>
+              <circle cx="160" cy="75" r="15" fill="#3498db" />
+              <line x1="160" y1="40" x2="160" y2="45" stroke="#ccc" stroke-width="4"/>
+              <line x1="145" y1="75" x2="145" y2="130" stroke="#f1c40f" stroke-width="2"/>
+              <line x1="175" y1="75" x2="175" y2="130" stroke="#f1c40f" stroke-width="2"/>
+              <!-- Measurement line -->
+              <line x1="50" y1="15" x2="160" y2="15" stroke="#fff" stroke-dasharray="2,2"/>
+              <text x="105" y="10" fill="#fff" font-size="10" text-anchor="middle">Max 750mm</text>
+            </svg>
+            <div class="caption">Diagram 6.0: Gin Wheel Installation (Max Extension)</div>
+          </div>
+        `
+      },
+      quiz: [
+        { 
+          q: { ms: "Berapakah jarak maksimum paip cantilevers (unjuran) yang dibenarkan untuk pemasangan Gin Wheel dari tiang perancah (Standard)?", en: "What is the maximum cantilever (extension) pipe distance allowed for Gin Wheel installation from the scaffold pole (Standard)?" }, 
+          options: { ms: ["500 mm", "750 mm", "1000 mm", "1200 mm"], en: ["500 mm", "750 mm", "1000 mm", "1200 mm"] }, answer: 1, 
+          explanation: { ms: "Unjuran tidak boleh melebihi 750mm. Lebih jauh takal dari tiang, lebih tinggi daya tuil (leverage) yang boleh menterbalikkan perancah.", en: "The extension must not exceed 750mm. The further the wheel is from the pole, the higher the leverage force that could tip the scaffold." } 
+        },
+        { 
+          q: { ms: "Apakah jenis cagak (mounting) Takal (Gin Wheel) yang paling selamat dan diwajibkan dalam pemasangan perancah?", en: "What type of Gin Wheel mounting is the safest and mandatory in scaffold erection?" }, 
+          options: { ms: ["Jenis cangkuk (Hook type)", "Jenis rantai (Chain type)", "Jenis cincin (Ring type)", "Jenis nat (Nut type)"], en: ["Hook type", "Chain type", "Ring type", "Nut type"] }, answer: 2, 
+          explanation: { ms: "Jenis Cincin (Ring) dimasukkan terus menembusi paip, memastikan ia tidak mungkin boleh terlucut atau jatuh berbanding cangkuk.", en: "Ring type is inserted directly through the pipe, ensuring it is impossible to slip or drop compared to a hook." } 
+        }
+      ]
+    }
+  ]
+};
+
+const FACTS_DATA = {
+  ms: [
+    "Tahukah anda? Jatuh dari ketinggian 2 meter sudah cukup untuk mencatatkan kecederaan fatal jika kepala terhentak.",
+    "Tubuh pekerja dan alatan tangan dikira sebagai Beban Hidup (Live Load) kerana ia bergerak.",
+    "Pekerja boleh didenda hingga RM1000 jika menolak arahan Seksyen 24 untuk memakai abah-abah (Safety Harness).",
+    "Dilarang sama sekali membongkar komponen perancah dari tingkat bawah terlebih dahulu!",
+    "Scafftag Hijau HANYA sah selama 7 hari dan mesti disemak semula oleh Inspektor Bertauliah.",
+    "Formula beban tali: Diameter x Diameter. Jika tali saiz 15mm, beban kerja selamatnya adalah 225 kg!",
+    "Pengganding Tetap (Right Angle) dan Swivel mampu menampung beban seberat 635 kg setiap satu.",
+    "Papan perancah (Timber board BS2482) wajib berketebalan minimum 38mm untuk kekuatan galas pekerja.",
+    "Isyarat kecemasan (Emergency Stop) untuk kren dilakukan dengan menyilang dua lengan secara mendatar berulang kali.",
+    "Di bawah BOWEC 1986, Peraturan 88 mewajibkan pemasangan 'Guard rails' dan 'Toe boards' pada setiap sisi terbuka pelantar kerja.",
+    "Perancah tubular yang dibina melebihi ketinggian 40 meter wajib mempunyai reka bentuk yang diluluskan oleh Professional Engineer (PE).",
+    "Jarak unjuran paip takal (Gin Wheel) tidak boleh dipasang melebih 750mm dari tiang (Standard)."
+  ],
+  en: [
+    "Did you know? Falling from a height of 2 meters is enough to record a fatal injury if the head is struck.",
+    "The worker's body and hand tools are considered Live Loads because they are mobile.",
+    "Workers can be fined up to RM1000 if they refuse Section 24's order to wear a Safety Harness.",
+    "It is strictly prohibited to dismantle scaffold components from the bottom level first!",
+    "Green Scafftags are ONLY valid for 7 days and must be re-checked by a Certified Inspector.",
+    "Rope load formula: Diameter x Diameter. If rope is 15mm, its safe working load is 225 kg!",
+    "Right Angle and Swivel Couplers can bear a heavy load of 635 kg each.",
+    "Timber boards (BS2482) must have a minimum thickness of 38mm for worker bearing strength.",
+    "The Emergency Stop signal for cranes is done by crossing both arms horizontally repeatedly.",
+    "Under BOWEC 1986, Regulation 88 mandates the installation of 'Guard rails' and 'Toe boards' on every open side of a working platform.",
+    "Tubular scaffolds erected above 40 meters must have designs approved by a Professional Engineer (PE).",
+    "The cantilever distance for a Gin Wheel pipe must not exceed 750mm from the Standard."
+  ]
+};
+
+// ============================
+// DATA CHECKLIST
+// ============================
+const checklistDataContent = {
+  ms: [
+    "Scafftag HIJAU masih sah dan belum tamat tempoh 7 hari.",
+    "Base plate berpijak padat di atas sole board / tanah kukuh tanpa mendap.",
+    "Tiang Standard berdiri tegak lurus (plumb) & tiada kesan kemek/bengkok.",
+    "Ledger & Transom pada kedudukan rata mendatar (level).",
+    "Semua penguat pepenjuru (Brace) wujud dan diikat dekat node point.",
+    "Papan pelantar ditutup penuh (tiada celah >10mm) & tidak retak.",
+    "Pagar penghadang (Top-rail & Mid-rail) & Toeboard (150-200mm) lengkap.",
+    "Tangga akses disandarkan kukuh, lebih 1m dan diikat mati.",
+    "Ties & ikatan dinding bangunan teguh dan ditarik tegang.",
+    "Saya memakai PPE (Helmet tali dagu ketat & Body Harness)."
+  ],
+  en: [
+    "GREEN Scafftag is still valid and not expired past 7 days.",
+    "Base plates sit firmly on sole boards / solid ground without sinking.",
+    "Standard tubes stand perfectly vertical (plumb) with no dent/bend marks.",
+    "Ledgers & Transoms are in a flat horizontal position (level).",
+    "All diagonal braces exist and are tied near node points.",
+    "Platform planks are fully closed (no gaps >10mm) & not cracked.",
+    "Guardrails (Top & Mid-rail) & Toeboard (150-200mm) are complete.",
+    "Access ladder is securely leaned, exceeds 1m above, and dead-tied.",
+    "Ties and building wall anchorages are sturdy and pulled taut.",
+    "I am wearing my PPE (Tight chin-strap Helmet & Body Harness)."
+  ]
+};
+
+// ============================
+// MANAJEMEN STATE & LOGIKA i18n
+// ============================
+const STATE_KEY = 'scaffsafe_pro_state';
+let state = {
+  lang: 'ms', currentLevel: 1, currentModuleId: null, currentQuizIndex: 0, currentQuizQuestions: [],
+  quizAnswers: [], quizMode: 'module', quizStartTime: 0, selectedOption: -1,
+  stats: { completedModules: [], quizzesTaken: 0, totalCorrect: 0, totalQuestions: 0, streak: 1, lastActiveDate: new Date().toDateString() }
+};
+
+function saveState() { try { localStorage.setItem(STATE_KEY, JSON.stringify(state)); } catch(e) { } }
+function loadState() {
+  try {
+    const saved = localStorage.getItem(STATE_KEY);
+    if (saved) { state = { ...state, ...JSON.parse(saved) }; updateStreak(); }
+  } catch(e) { }
+}
+
+function toggleLang() {
+  state.lang = state.lang === 'ms' ? 'en' : 'ms';
+  saveState();
+  applyLanguage();
+}
+
+function applyLanguage() {
+  document.getElementById('btn-lang-ms').className = state.lang === 'ms' ? 'active' : '';
+  document.getElementById('btn-lang-en').className = state.lang === 'en' ? 'active' : '';
+  
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (UI_TEXT[key] && UI_TEXT[key][state.lang]) {
+      if (el.tagName === 'INPUT' && el.type === 'text') {
+        el.placeholder = UI_TEXT[key][state.lang];
+      } else {
+        el.innerHTML = UI_TEXT[key][state.lang];
+      }
+    }
+  });
+
+  updateDashboard();
+  randomizeFact();
+  
+  if (document.getElementById('screen-levels').classList.contains('active')) showLevelModules(state.currentLevel);
+  if (document.getElementById('screen-lesson').classList.contains('active')) openModule(state.currentModuleId);
+  if (document.getElementById('screen-quiz').classList.contains('active')) loadQuestion();
+  if (document.getElementById('screen-checklist').classList.contains('active')) initChecklist();
+  if (document.getElementById('screen-progress').classList.contains('active')) updateProgressScreen();
+  if (document.getElementById('screen-calculator').classList.contains('active')) calculateLoad();
+  
+  document.documentElement.lang = state.lang;
+}
+
+function updateStreak() {
+  const today = new Date().toDateString();
+  const lastDate = state.stats.lastActiveDate;
+  if (lastDate !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    if (lastDate === yesterday) state.stats.streak += 1; else state.stats.streak = 1;
+    state.stats.lastActiveDate = today; saveState();
+  }
+}
+
+// ============================
+// MESIN NAVIGASI
+// ============================
+function showScreen(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + screenId).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function goHome() { showScreen('home'); updateDashboard(); randomizeFact(); }
+
+// ============================
+// PEMBARUAN DASHBOARD
+// ============================
+function updateDashboard() {
+  const totalModules = MODULES[1].length;
+  const completed = state.stats.completedModules.length;
+  const percent = Math.round((completed / totalModules) * 100);
+  
+  document.getElementById('overallProgress').textContent = percent + '%';
+  document.getElementById('progressFill').style.width = percent + '%';
+  document.getElementById('moduleCompleted').textContent = completed;
+  document.getElementById('moduleTotal').textContent = totalModules;
+  document.getElementById('streakCount').textContent = state.stats.streak;
+}
+
+function randomizeFact() {
+  const factText = document.getElementById('dailyFact');
+  if(factText) {
+    const factsArray = FACTS_DATA[state.lang];
+    factText.textContent = `"${factsArray[Math.floor(Math.random() * factsArray.length)]}"`;
+  }
+}
+
+// ============================
+// RENDERER LEVEL & MODUL
+// ============================
+function showLevelModules(level) {
+  if (level !== 1) { showModal(state.lang === 'ms' ? 'Silibus Level ' + level + ' sedang dikemas kini.' : 'Level ' + level + ' syllabus is updating.', 'alert'); return; }
+  
+  state.currentLevel = level;
+  document.getElementById('moduleScreenTitle').textContent = state.lang === 'ms' ? 'Modul Peringkat Asas (Level 1)' : 'Basic Level Modules (Level 1)';
+  document.getElementById('moduleCount').textContent = String(MODULES[level].length).padStart(2, '0') + (state.lang === 'ms' ? ' Modul Standard' : ' Standard Modules');
+  
+  const list = document.getElementById('moduleList'); list.innerHTML = '';
+  
+  MODULES[level].forEach((mod, idx) => {
+    const done = state.stats.completedModules.includes(mod.id);
+    const btn = document.createElement('button');
+    btn.className = 'module-item' + (done ? ' completed' : '');
+    btn.onclick = () => openModule(mod.id);
+    btn.innerHTML = `
+      <span class="module-number">${String(idx + 1).padStart(2, '0')}</span>
+      <span class="module-title">${mod.title[state.lang]}</span>
+      <span class="module-status ${done ? 'done' : ''}">${done ? (state.lang === 'ms' ? '✓ Siap' : '✓ Done') : (state.lang === 'ms' ? 'Belum' : 'Pending')}</span>
+    `;
+    list.appendChild(btn);
+  });
+  showScreen('modules');
+}
+
+function openModule(moduleId) {
+  const mod = MODULES[state.currentLevel].find(m => m.id === moduleId);
+  if (!mod) return;
+  state.currentModuleId = moduleId;
+  document.getElementById('lessonBreadcrumb').textContent = state.lang === 'ms' ? 'Peringkat 1 / Modul Rujukan' : 'Level 1 / Reference Module';
+  document.getElementById('lessonTitle').textContent = mod.title[state.lang];
+  document.getElementById('lessonBody').innerHTML = mod.content[state.lang];
+  showScreen('lesson');
+}
+
+// ============================
+// MESIN KUIS
+// ============================
+function startModuleQuiz() {
+  const mod = MODULES[state.currentLevel].find(m => m.id === state.currentModuleId);
+  if (!mod) return;
+  state.quizMode = 'module'; state.currentQuizQuestions = [...mod.quiz];
+  state.currentQuizIndex = 0; state.quizAnswers = []; state.quizStartTime = Date.now(); state.selectedOption = -1;
+  showScreen('quiz'); loadQuestion(); startTimer(false);
+}
+
+function startDailyQuiz() {
+  const allQuestions = [];
+  MODULES[1].forEach(mod => { mod.quiz.forEach(q => allQuestions.push(q)); });
+  const shuffled = allQuestions.sort(() => Math.random() - 0.5);
+  state.quizMode = 'daily'; state.currentQuizQuestions = shuffled.slice(0, 5);
+  state.currentQuizIndex = 0; state.quizAnswers = []; state.quizStartTime = Date.now();
+  showScreen('quiz'); loadQuestion(); startTimer(false);
+}
+
+function startMockExam() {
+  const allQuestions = [];
+  MODULES[1].forEach(mod => { mod.quiz.forEach(q => allQuestions.push(q)); });
+  if (allQuestions.length < 10) { showModal(state.lang === 'ms' ? 'Sistem sedang kemaskini data bank soalan.' : 'System is updating question bank data.'); return; }
+  const shuffled = allQuestions.sort(() => Math.random() - 0.5);
+  state.quizMode = 'mock'; state.currentQuizQuestions = shuffled.slice(0, 10); 
+  state.currentQuizIndex = 0; state.quizAnswers = []; state.quizStartTime = Date.now();
+  showScreen('quiz'); loadQuestion(); startTimer(true);
+}
+
+let timerInterval = null;
+function startTimer(isCountdown) {
+  clearInterval(timerInterval);
+  const duration = isCountdown ? (20 * 60) : 0; 
+  const startTime = Date.now();
+  
+  timerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    let display;
+    if (isCountdown) {
+      const remaining = duration - elapsed;
+      if (remaining <= 0) {
+        clearInterval(timerInterval); playSound('wrong');
+        showModal(state.lang === 'ms' ? "Masa Tamat!" : "Time's Up!", "alert", finishQuiz); return;
+      }
+      const m = Math.floor(remaining / 60); const s = remaining % 60;
+      display = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+      if(remaining < 180) document.getElementById('quizTimer').style.color = "var(--danger)";
+    } else {
+      const m = Math.floor(elapsed / 60); const s = elapsed % 60;
+      display = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+      document.getElementById('quizTimer').style.color = "var(--accent)"; 
+    }
+    document.getElementById('quizTimer').textContent = display;
+  }, 1000);
+}
+
+function loadQuestion() {
+  if (state.currentQuizQuestions.length === 0) return;
+  const q = state.currentQuizQuestions[state.currentQuizIndex];
+  document.getElementById('currentQNum').textContent = state.currentQuizIndex + 1;
+  document.getElementById('totalQNum').textContent = state.currentQuizQuestions.length;
+  document.getElementById('quizQuestion').textContent = q.q[state.lang];
+  document.getElementById('explanation').classList.remove('show');
+  
+  const optionsDiv = document.getElementById('quizOptions');
+  optionsDiv.innerHTML = ''; state.selectedOption = -1;
+  const letters = ['A', 'B', 'C', 'D'];
+  q.options[state.lang].forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option'; btn.onclick = () => selectOption(i);
+    btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span>${opt}</span>`;
+    optionsDiv.appendChild(btn);
+  });
+  document.getElementById('nextBtn').disabled = true;
+  document.getElementById('nextBtn').textContent = state.lang === 'ms' ? 'Semak Jawapan' : 'Check Answer';
+}
+
+function selectOption(idx) {
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  state.selectedOption = idx;
+  document.querySelectorAll('.quiz-option').forEach((opt, i) => { opt.classList.toggle('selected', i === idx); });
+  document.getElementById('nextBtn').disabled = false;
+  document.getElementById('nextBtn').textContent = state.lang === 'ms' ? 'Semak Jawapan' : 'Check Answer';
+}
+
+function nextQuestion() {
+  const btn = document.getElementById('nextBtn');
+  const q = state.currentQuizQuestions[state.currentQuizIndex];
+  const isLast = state.currentQuizIndex === state.currentQuizQuestions.length - 1;
+  
+  if (btn.textContent.includes('Semak') || btn.textContent.includes('Check')) {
+    const isCorrect = state.selectedOption === q.answer;
+    if(isCorrect) playSound('correct'); else playSound('wrong');
+
+    state.quizAnswers.push({ question: q, selected: state.selectedOption, correct: isCorrect });
+    document.querySelectorAll('.quiz-option').forEach((opt, i) => {
+      opt.classList.add('disabled'); opt.onclick = null;
+      if (i === q.answer) opt.classList.add('correct');
+      else if (i === state.selectedOption) opt.classList.add('wrong');
+    });
+    document.getElementById('explanationText').textContent = q.explanation[state.lang];
+    document.getElementById('explanation').classList.add('show');
+    btn.textContent = isLast ? (state.lang === 'ms' ? 'Lihat Keputusan' : 'View Results') : (state.lang === 'ms' ? 'Soalan Seterusnya →' : 'Next Question →');
+    return;
+  }
+  
+  state.currentQuizIndex++;
+  if (state.currentQuizIndex >= state.currentQuizQuestions.length) finishQuiz();
+  else loadQuestion();
+}
+
+function finishQuiz() {
+  clearInterval(timerInterval);
+  const correct = state.quizAnswers.filter(a => a.correct).length;
+  const total = state.quizAnswers.length;
+  const percent = total > 0 ? Math.round((correct / total) * 100) : 0;
+  const timeTaken = Math.floor((Date.now() - state.quizStartTime) / 1000);
+  
+  state.stats.quizzesTaken++; state.stats.totalCorrect += correct; state.stats.totalQuestions += total;
+  const passMark = state.quizMode === 'mock' ? 80 : 60; 
+  if (state.quizMode === 'module' && percent >= passMark) {
+    if (!state.stats.completedModules.includes(state.currentModuleId)) state.stats.completedModules.push(state.currentModuleId);
+  }
+  saveState();
+  
+  document.getElementById('resultScore').textContent = percent + '%';
+  document.getElementById('statCorrect').textContent = correct;
+  document.getElementById('statWrong').textContent = total - correct;
+  const m = Math.floor(timeTaken / 60); const s = timeTaken % 60;
+  document.getElementById('statTime').textContent = m + ':' + String(s).padStart(2,'0');
+  
+  const statusEl = document.getElementById('resultStatus');
+  if (percent >= passMark) {
+    statusEl.innerHTML = state.lang === 'ms' ? `LULUS ✓<br><small style="font-size:0.65rem; opacity:0.8;">MELEPASI TAHAP MINIMUM (${passMark}%)</small>` : `PASSED ✓<br><small style="font-size:0.65rem; opacity:0.8;">PASSED MINIMUM REQUIREMENT (${passMark}%)</small>`;
+    statusEl.className = 'result-status pass'; playSound('correct');
+  } else {
+    statusEl.innerHTML = state.lang === 'ms' ? `GAGAL ✗<br><small style="font-size:0.65rem; opacity:0.8;">SKOR MINIMUM: ${passMark}%</small>` : `FAILED ✗<br><small style="font-size:0.65rem; opacity:0.8;">MINIMUM SCORE: ${passMark}%</small>`;
+    statusEl.className = 'result-status fail'; playSound('wrong');
+  }
+  showScreen('result');
+}
+
+function exitQuiz() {
+  showModal(state.lang === 'ms' ? 'Amaran: Rekod sesi ini akan terpadam. Teruskan?' : 'Warning: Records for this session will be lost. Continue?', 'confirm', function() {
+    clearInterval(timerInterval); goHome();
+  });
+}
+function retryQuiz() { if (state.quizMode === 'module') startModuleQuiz(); else if (state.quizMode === 'daily') startDailyQuiz(); else startMockExam(); }
+
+// ============================
+// KALKULATOR
+// ============================
+function calculateLoad() {
+  const plank = (parseFloat(document.getElementById('calcPlank').value) || 0) * 5.4;
+  const guardrail = (parseFloat(document.getElementById('calcGuardrail').value) || 0) * 2.55;
+  const brace = (parseFloat(document.getElementById('calcBrace').value) || 0) * 5.9;
+  const base = (parseFloat(document.getElementById('calcBase').value) || 0) * 1.4;
+  const ladder = (parseFloat(document.getElementById('calcLadder').value) || 0) * 2.9;
+  const lain = parseFloat(document.getElementById('calcLain').value) || 0;
+  
+  const deadLoad = plank + guardrail + brace + base + ladder + lain;
+  const dutyLoad = parseFloat(document.getElementById('calcDuty').value) || 0;
+  const totalLoad = deadLoad + dutyLoad;
+  
+  document.getElementById('calcResult').innerHTML = totalLoad.toFixed(1) + ' <span style="font-size:1.2rem; color:var(--text-dim);">kg</span>';
+  
+  const boxEl = document.getElementById('calcResultBox'); const warningEl = document.getElementById('calcWarning');
+  if (totalLoad > 2000) {
+    boxEl.style.borderColor = "var(--danger)"; boxEl.style.boxShadow = "0 10px 30px rgba(255,61,0,0.3)";
+    warningEl.style.display = "block"; warningEl.style.color = "var(--danger)"; warningEl.style.backgroundColor = "rgba(255,61,0,0.1)";
+    warningEl.textContent = state.lang === 'ms' ? "AMARAN: Beban melebihi 2000kg. Risiko Base Jack." : "WARNING: Load exceeds 2000kg. Base Jack risk.";
+  } else if (totalLoad > 1000) {
+    boxEl.style.borderColor = "var(--warning)"; boxEl.style.boxShadow = "0 10px 30px rgba(255,196,0,0.2)";
+    warningEl.style.display = "block"; warningEl.style.color = "var(--warning)"; warningEl.style.backgroundColor = "rgba(255,196,0,0.1)";
+    warningEl.textContent = state.lang === 'ms' ? "Nota: Beban Sederhana Tinggi." : "Note: Medium-High Load.";
+  } else {
+    boxEl.style.borderColor = "var(--accent)"; boxEl.style.boxShadow = "0 10px 30px var(--surface-glow)"; warningEl.style.display = "none";
+  }
+}
+
+// ============================
+// CHECKLIST
+// ============================
+function initChecklist() {
+  const container = document.getElementById('checklistItemsContainer'); container.innerHTML = '';
+  let savedChecks = []; try { savedChecks = JSON.parse(localStorage.getItem('scaffsafe_checklist') || '[]'); } catch(e){}
+
+  checklistDataContent[state.lang].forEach((text, i) => {
+    const isChecked = savedChecks[i] ? 'checked' : '';
+    const label = document.createElement('label'); label.className = 'interactive-check';
+    label.innerHTML = `<input type="checkbox" id="chk-${i}" onchange="saveChecklist()" ${isChecked}> <span>${text}</span>`;
+    container.appendChild(label);
+  });
+  updateChecklistDate();
+}
+
+function saveChecklist() {
+  const checks = [];
+  checklistDataContent[state.lang].forEach((_, i) => { checks[i] = document.getElementById(`chk-${i}`).checked; });
+  localStorage.setItem('scaffsafe_checklist', JSON.stringify(checks));
+}
+
+function resetChecklist() {
+  showModal(state.lang === 'ms' ? 'Padam rekod checklist harian ini?' : 'Delete today\'s checklist record?', 'confirm', () => {
+    localStorage.removeItem('scaffsafe_checklist'); initChecklist();
+  });
+}
+
+function updateChecklistDate() {
+  const dt = new Date();
+  document.getElementById('checklistDateDisplay').textContent = (state.lang === 'ms' ? "Tarikh Inspeksi: " : "Inspection Date: ") + dt.toLocaleDateString() + " " + dt.toLocaleTimeString();
+}
+
+function printChecklist() { updateChecklistDate(); document.body.classList.add('print-checklist-mode'); window.print(); document.body.classList.remove('print-checklist-mode'); }
+
+// ============================
+// SERTIFIKAT
+// ============================
+let userPhotoBase64 = "";
+function previewCertPhoto(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) { userPhotoBase64 = e.target.result; document.getElementById('certPreviewImg').src = userPhotoBase64; document.getElementById('certPreviewImg').style.display = "block"; }
+    reader.readAsDataURL(file);
+  }
+}
+
+function generateCertificate() {
+  const nameInput = document.getElementById('certNameInput').value.trim().toUpperCase();
+  if(nameInput === "") { showModal(state.lang === 'ms' ? "Sila masukkan Nama Penuh." : "Please enter your Full Name."); return; }
+  if(userPhotoBase64 === "") { showModal(state.lang === 'ms' ? "Sila muat naik gambar profil." : "Please upload a profile picture."); return; }
+  
+  if(state.stats.completedModules.length < MODULES[1].length) {
+    showModal(state.lang === 'ms' ? `Baru ${state.stats.completedModules.length}/13 Modul. Sila lengkapkan semua kuiz untuk kelayakan Sijil.` : `Only ${state.stats.completedModules.length}/13 Modules. Complete all quizzes to qualify for Certificate.`, 'alert');
+  }
+
+  document.getElementById('certSerialNum').textContent = `SFP-2026-${Math.floor(Math.random() * 9000) + 1000}`;
+  document.getElementById('finalCertName').textContent = nameInput;
+  document.getElementById('finalCertPhoto').src = userPhotoBase64;
+  document.getElementById('finalCertDate').textContent = new Date().toLocaleDateString(state.lang === 'ms' ? 'ms-MY' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  document.getElementById('certFormArea').style.display = "none";
+  document.getElementById('certOutputArea').style.display = "block";
+}
+
+function resetCertificate() { document.getElementById('certOutputArea').style.display = "none"; document.getElementById('certFormArea').style.display = "block"; }
+function printCertificate() { document.body.classList.add('print-mode'); window.print(); document.body.classList.remove('print-mode'); }
+
+// ============================
+// PENCARIAN & PROGRES
+// ============================
+function doSearch() {
+  const query = document.getElementById('searchInput').value.toLowerCase().trim();
+  const results = document.getElementById('searchResults'); results.innerHTML = '';
+  if (!query || query.length < 2) {
+    results.innerHTML = `<div style="text-align:center; padding:2rem 0; color:var(--text-dim); font-size:0.9rem;"><svg class="svg-icon" style="width:40px;height:40px; opacity:0.5; margin-bottom:1rem;" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg><br>${state.lang==='ms' ? 'Gunakan ruangan di atas untuk mencari maklumat pantas.' : 'Use the field above to quickly search for info.'}</div>`;
+    return;
+  }
+  
+  const found = [];
+  MODULES[1].forEach((mod, idx) => {
+    if (mod.title[state.lang].toLowerCase().includes(query) || mod.content[state.lang].toLowerCase().includes(query)) found.push({ mod, idx });
+  });
+  
+  if (found.length === 0) {
+    results.innerHTML = `<div style="padding:1rem; color:var(--warning); text-align:center; font-family: JetBrains Mono, monospace; font-size:0.85rem; background: rgba(255,196,0,0.1); border-radius: 8px;">${state.lang==='ms'?'Tiada padanan rujukan ditemui.':'No matches found.'}</div>`;
+    return;
+  }
+  
+  found.forEach(({ mod, idx }) => {
+    const btn = document.createElement('button'); btn.className = 'module-item'; btn.onclick = () => openModule(mod.id);
+    btn.innerHTML = `<span class="module-number">Ref ${String(idx + 1).padStart(2, '0')}</span><span class="module-title">${mod.title[state.lang]}</span><span class="module-status" style="color:var(--accent);">Baca →</span>`;
+    results.appendChild(btn);
+  });
+}
+
+function updateProgressScreen() {
+  document.getElementById('pgModulesDone').textContent = state.stats.completedModules.length + " / 13";
+  document.getElementById('pgQuizzesDone').textContent = state.stats.quizzesTaken;
+  document.getElementById('pgAvgScore').textContent = (state.stats.totalQuestions > 0 ? Math.round((state.stats.totalCorrect / state.stats.totalQuestions) * 100) : 0) + '%';
+  document.getElementById('pgStreak').innerHTML = state.stats.streak + (state.lang === 'ms' ? ' Hari' : ' Days');
+}
+const origShowScreen = showScreen; showScreen = function(id) { origShowScreen(id); if (id === 'progress') updateProgressScreen(); };
+
+// ============================
+// INISIALISASI
+// ============================
+loadState();
+applyLanguage();
+</script>
+</body>
+</html>
