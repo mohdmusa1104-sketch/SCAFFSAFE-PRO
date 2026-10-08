@@ -1,0 +1,42 @@
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+const types={standard:['Standard',0xced9df],ledger:['Ledger',0x7fadd5],transom:['Transom',0x58b9ae],bracing:['Bracing',0xe5a355],sole:['Sole board',0x967047],base:['Base plate',0x697883],platform:['Platform',0xb9a77e],toprail:['Top rail',0xf6c34d],midrail:['Midrail',0xdca336],toe:['Toe board',0xc8904b],coupler:['Coupler',0x485664]};
+const viewport=document.querySelector('#viewport'),error=document.querySelector('#error');
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x101a27);
+const camera=new THREE.PerspectiveCamera(40,1,0.01,250);
+let renderer;
+try{renderer=new THREE.WebGLRenderer({antialias:true});}catch(e){error.textContent='WebGL tidak tersedia. Aktifkan sokongan grafik pelayar.';throw e;}
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));viewport.appendChild(renderer.domElement);
+const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.maxDistance=80;controls.minDistance=1;
+scene.add(new THREE.HemisphereLight(0xffffff,0x536070,2.5));const light=new THREE.DirectionalLight(0xffffff,3);light.position.set(8,14,10);scene.add(light);
+const grid=new THREE.GridHelper(30,30,0x62748c,0x293c50);grid.position.y=-0.105;scene.add(grid);
+const materials=Object.fromEntries(Object.entries(types).map(([k,v])=>[k,new THREE.MeshStandardMaterial({color:v[1],roughness:k==='coupler'?0.4:0.65,metalness:['sole','platform','toe'].includes(k)?0:0.55})]));
+let root,groups,config,metrics;const visible={};
+for(const [key,[name,color]] of Object.entries(types)){visible[key]=true;const label=document.createElement('label');const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=true;checkbox.dataset.component=key;checkbox.addEventListener('change',()=>{visible[key]=checkbox.checked;groups[key].visible=checkbox.checked;});const swatch=document.createElement('span');swatch.className='swatch';swatch.style.background='#'+color.toString(16).padStart(6,'0');label.append(checkbox,swatch,document.createTextNode(name));document.querySelector('#components').append(label);}
+function mesh(type,geometry,position){const obj=new THREE.Mesh(geometry,materials[type]);obj.position.copy(new THREE.Vector3(...position));groups[type].add(obj);return obj;}
+function box(type,size,pos){return mesh(type,new THREE.BoxGeometry(...size),pos);}
+function tube(type,a,b,r=0.02415){const start=new THREE.Vector3(...a),end=new THREE.Vector3(...b),direction=end.clone().sub(start);const obj=mesh(type,new THREE.CylinderGeometry(r,r,direction.length(),10),start.clone().add(end).multiplyScalar(0.5).toArray());obj.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),direction.normalize());return obj;}
+function coupler(pos){box('coupler',[0.10,0.075,0.10],pos);box('coupler',[0.12,0.025,0.025],[pos[0],pos[1]+0.045,pos[2]]);}
+function clear(){if(root){root.traverse(o=>{if(o.geometry)o.geometry.dispose();});scene.remove(root);}root=new THREE.Group();groups={};for(const key of Object.keys(types)){groups[key]=new THREE.Group();groups[key].visible=visible[key];root.add(groups[key]);}scene.add(root);}
+function build(c){const nx=Math.ceil(c.length/c.bay),nz=Math.ceil(c.width/c.bay),nl=Math.ceil(c.height/c.lift);if((nx+1)*(nz+1)*nl>1200)throw new Error('Model terlalu besar. Besarkan jarak bay atau kurangkan dimensi.');clear();config=c;const dx=c.length/nx,dz=c.width/nz,dy=c.height/nl;
+ const xs=Array.from({length:nx+1},(_,i)=>i*dx-c.length/2),zs=Array.from({length:nz+1},(_,i)=>i*dz-c.width/2);
+ // Overall standard height is the input height. The highest deck leaves 1 m for edge protection.
+ const deck=c.height-1;const levels=[0.15];for(let i=1;i<nl;i++){const y=i*dy;if(y<deck-0.1)levels.push(y);}levels.push(deck);
+ for(const x of xs)for(const z of zs){box('sole',[0.45,0.05,0.65],[x,-0.075,z]);box('base',[0.15,0.025,0.15],[x,-0.0375,z]);tube('base',[x,-0.025,z],[x,0.12,z],0.017);tube('standard',[x,0,z],[x,c.height,z]);}
+ for(const y of levels){for(const z of zs)for(let i=0;i<nx;i++)tube('ledger',[xs[i],y,z-0.028],[xs[i+1],y,z-0.028]);for(const x of xs)for(let j=0;j<nz;j++)tube('transom',[x+0.028,y,zs[j]],[x+0.028,y,zs[j+1]]);for(const x of xs)for(const z of zs)coupler([x,y,z]);}
+ const braceLevels=[0.15,...levels.slice(1),c.height];for(let l=0;l<braceLevels.length-1;l++){const low=braceLevels[l],high=braceLevels[l+1];for(const z of [zs[0]-0.065,zs.at(-1)+0.065])for(let i=0;i<nx;i++){const a=[xs[i],(i+l)%2?high:low,z],b=[xs[i+1],(i+l)%2?low:high,z];tube('bracing',a,b);coupler(a);coupler(b);}for(const x of [xs[0]-0.065,xs.at(-1)+0.065])for(let j=0;j<nz;j++){const a=[x,(j+l)%2?high:low,zs[j]],b=[x,(j+l)%2?low:high,zs[j+1]];tube('bracing',a,b);coupler(a);coupler(b);}}
+ // Plan bracing under the deck, not across the walking surface.
+ tube('bracing',[xs[0],deck-0.09,zs[0]],[xs.at(-1),deck-0.09,zs.at(-1)]);coupler([xs[0],deck-0.09,zs[0]]);coupler([xs.at(-1),deck-0.09,zs.at(-1)]);
+ for(let i=0;i<nx;i++)for(let j=0;j<nz;j++){const boards=Math.ceil(dz/0.225);for(let b=0;b<boards;b++)box('platform',[dx-0.015,0.04,dz/boards-0.008],[(xs[i]+xs[i+1])/2,deck+0.045,zs[j]+(b+0.5)*dz/boards]);}
+ for(const [type,offset] of [['toprail',1],['midrail',0.5]]){const y=deck+offset;for(const z of [zs[0],zs.at(-1)])for(let i=0;i<nx;i++)tube(type,[xs[i],y,z],[xs[i+1],y,z]);for(const x of [xs[0],xs.at(-1)])for(let j=0;j<nz;j++)tube(type,[x,y,zs[j]],[x,y,zs[j+1]]);for(const x of xs)for(const z of zs)if(x===xs[0]||x===xs.at(-1)||z===zs[0]||z===zs.at(-1))coupler([x,y,z]);}
+ for(const z of [zs[0],zs.at(-1)])box('toe',[c.length,0.15,0.025],[0,deck+0.14,z]);for(const x of [xs[0],xs.at(-1)])box('toe',[0.025,0.15,c.width],[x,deck+0.14,0]);
+ metrics={nx,nz,nl,dx,dz,dy,deck,counts:Object.fromEntries(Object.entries(groups).map(([k,g])=>[k,k==='coupler'?g.children.length/2:g.children.length]))};
+ document.querySelector('#summary').textContent=`${c.length} × ${c.width} × ${c.height} m · ${nx} × ${nz} bay (${dx.toFixed(2)} × ${dz.toFixed(2)} m) · Pembahagian lift ${dy.toFixed(2)} m · Platform ${deck.toFixed(2)} m · Rail atas ${c.height.toFixed(2)} m`;
+ view('iso');}
+function view(which){if(!config)return;const center=new THREE.Vector3(0,config.height/2,0),distance=Math.max(config.length,config.width,config.height)*2.5;camera.up.set(0,1,0);const directions={front:[0,0,1],side:[1,0,0],top:[0,1,0],iso:[1,0.8,1]};if(which==='top')camera.up.set(0,0,-1);camera.position.copy(center).add(new THREE.Vector3(...directions[which]).normalize().multiplyScalar(distance));controls.target.copy(center);controls.update();}
+const form=document.querySelector('form');form.addEventListener('submit',e=>{e.preventDefault();error.textContent='';try{const c=Object.fromEntries([...new FormData(form)].map(([k,v])=>[k,Number(v)]));for(const input of form.querySelectorAll('input'))if(!Number.isFinite(c[input.name])||!input.checkValidity())throw new Error('Semak julat dimensi yang dibenarkan.');build(c);}catch(e){error.textContent=e.message;}});
+document.querySelector('#reset').onclick=()=>{HTMLFormElement.prototype.reset.call(form);form.requestSubmit();};document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>view(b.dataset.view));for(const [id,factor] of [['zoom-in',0.8],['zoom-out',1.25]])document.getElementById(id).onclick=()=>{const delta=camera.position.clone().sub(controls.target);delta.setLength(THREE.MathUtils.clamp(delta.length()*factor,controls.minDistance,controls.maxDistance));camera.position.copy(controls.target).add(delta);controls.update();};document.querySelector('#pan').onclick=e=>{const active=e.target.getAttribute('aria-pressed')!=='true';e.target.setAttribute('aria-pressed',String(active));controls.mouseButtons.LEFT=active?THREE.MOUSE.PAN:THREE.MOUSE.ROTATE;};
+new ResizeObserver(()=>{const w=viewport.clientWidth,h=viewport.clientHeight;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();}).observe(viewport);
+form.requestSubmit();renderer.setAnimationLoop(()=>{controls.update();renderer.render(scene,camera);});
+// Read-only diagnostic snapshot for browser validation.
+window.scaffoldSnapshot=()=>({config:{...config},metrics:structuredClone(metrics),visibility:Object.fromEntries(Object.entries(groups).map(([k,g])=>[k,g.visible])),camera:camera.position.toArray(),target:controls.target.toArray(),bounds:new THREE.Box3().setFromObject(root).getSize(new THREE.Vector3()).toArray()});
